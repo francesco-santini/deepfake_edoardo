@@ -89,14 +89,20 @@ Ultimately, this thesis aims to contribute to the ongoing development of
 Deepfake technology while also promoting a responsible and ethical use of this powerful tool. 
 In addition, we hope that this approach will inspire further research in this area and 
 lead to the creation of even more advanced and innovative Deepfake techniques.
-In Chapter \ref{ch:background}, we will understand all the models used in this thesis, understand what a Deepfake is, and look at current state-of-the-art models for generating Deepfakes.
-In Chapter \ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate Deepfakes.
 
 
+\todo[inline]{Più su introduzione e motivare importanza [Santini]}
+
+In Section~\ref{ch:background}, we will understand all the models used in this thesis, understand what a Deepfake is, and look at current state-of-the-art models for generating Deepfakes.
+In Section~\ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate Deepfakes. Section~\ref{sect:related} summarizes the related work, while Section~\ref{ch:conclusion} provides final conclusions and future work.
+
+\todo{Le immagini in tutto l'articolo sono molto grandi in dimensione: le ho ridotte tutte, ma forse ancora non basta: quando compilo mi ci mette una vita e il pdf è quasi 13 mega. Vanno anche ridimensionate in modo che si vedano bene: gli screenshot dell'interfaccia sono in genere molto difficile da far vedere, soprattutto la parte scritta[Edoardo]}
 
 
 \section{Background}\label{ch:background}
-In this chapter, we will analyze all the major technologies used to develop an application to generate 
+
+\todo[inline]{abbiamo tutto in bg? Le figure che mancano se servono vanno rimesse rifatte e non prese e incollate da altri articoli e libri: copyright!}
+In this section, we will analyze all the major technologies used to develop an application to generate 
 Deepfakes through one of the newest generative models called Stable diffusion. 
 We will start by understanding what a diffusion model is and how Stable Diffusion can condition the 
 generation of an image through a textual or graphical input. 
@@ -153,7 +159,7 @@ therefore, they do not allow data compression by default, making them \textbf{co
 
 
 Diffusion models are inspired by \emph{non-equilibrium thermodynamics} \cite{V_n_2020}. 
-They define a \textbf{Markov chain} of diffusion steps (shown in Fig. \ref{fig:m-chain}) to slowly 
+They define a \textbf{Markov chain} of diffusion steps (shown in Figure \ref{fig:m-chain}) to slowly 
 add \textbf{Gaussian noise} to data and then learn to reverse the diffusion process to construct desired data samples from the noise \cite{weng2021diffusion}. 
 In the case of images, this model is composed of two processes:
 \begin{itemize}
@@ -271,11 +277,15 @@ The network also uses \emph{global attention} in the lower dimensional layers to
 
 \paragraph{Sampling}
 The sampling process is done by reversing the diffusion process. The algorithm is defined as follows:
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=8cm, keepaspectratio]{img/background_img/DDPM-sampling.png}
 	\caption{Sampling algorithm \cite{weng2021diffusion}.}
 \end{figure}
+
+\todo{Usa package algorithm [Edoardo]}
+
 We start from $T$, where we sample pure noise from a Gaussian distribution, 
 and then use the trained neural network to denoise it gradually at each time step until we end up at time step $t=0$.
 Ideally, the algorithm will return an image coherent with the real data distribution.
@@ -290,7 +300,7 @@ Stable Diffusion also accepts \textbf{textual prompts} as a conditioning input, 
 
 \subsubsection{The architecture}\label{sec:ldm-architecture} 
 
-Fig. \ref{fig:ldm-architecture} shows the \textbf{architecture} of the Stable Diffusion model.
+Figure~\ref{fig:ldm-architecture} shows the \textbf{architecture} of the Stable Diffusion model.
 The first element is a VAE that transforms the \textbf{pixel space} of the input tensor into a latent space that is 
 perceptually equivalent to the data space. The \emph{universal autoencoding stage} is trained before the DM, 
 making it reusable on multiple DM trainings. A \emph{Transformer language model} $\tau_\theta$ is used as the language understanding component 
@@ -306,7 +316,7 @@ Given an image and text descriptions, the model can predict the most relevant te
 optimizing for a particular task.
 
 
-CLIP is trained on a 400 million image-text pairs dataset, and Fig. \ref{fig:clip-training} shows the training steps done for each 
+CLIP is trained on a 400 million image-text pairs dataset, and Figure~\ref{fig:clip-training} shows the training steps done for each 
 data pair.
 Firstly, each image and caption are encoded with an image and a text encoder. Then, using \emph{cosine similarity}, 
 the two embeddings are compared to each other, giving a score that will be low at first. 
@@ -353,7 +363,7 @@ pre-trained image diffusion models with task-specific conditions.
 The model manipulates the input conditions of network blocks to control the overall behavior of an entire neural network.
 
 
-Fig. \ref{fig:controlnet}-(a) shows an arbitrary \textbf{neural network block} $\mathcal{F}(\cdot;\Theta)$, 
+Figure~\ref{fig:controlnet}-(a) shows an arbitrary \textbf{neural network block} $\mathcal{F}(\cdot;\Theta)$, 
 with a set of parameters $\Theta$,
 where, for example, a \textbf{feature map} $x \in \mathbb{R}^{h\times w \times c}$, with ${h,w,c}$ 
 being height, width, and channel numbers
@@ -361,7 +371,7 @@ is transformed into another feature map $y$ with
 \begin{equation}
 	y = \mathcal{F}(x;\Theta)
 \end{equation}
-In Fig. \ref{fig:controlnet}-(b), we can see how a ControlNet is applied to a neural network block.
+In Figure~\ref{fig:controlnet}-(b), we can see how a ControlNet is applied to a neural network block.
 All $\Theta$ parameters are locked and then cloned to a \textbf{trainable copy} $\Theta_c$, 
 which is trained with an \textbf{external condition vector} $c$. 
 This copy is created to avoid overfitting when the training dataset is small 
@@ -384,7 +394,7 @@ zero convolutions become an unique type of connection layer that progressively g
 optimized parameters in a learned way'' \cite{zhang2023adding}.\\
 
 
-As shown in Fig. \ref{fig:controlnet-2}, ControlNet controls each level of the Stable Diffusion U-Net in a 
+As shown in Figure~\ref{fig:controlnet-2}, ControlNet controls each level of the Stable Diffusion U-Net in a 
 \textbf{computationally efficient} way due to the locked weights of the diffusion model, so no gradient computation on the original 
 encoder is needed for training. With ControlNet, the overall learning objective becomes:
 \begin{equation}
@@ -411,7 +421,7 @@ Here are all the types of conditioning available with ControlNet:
 	\label{fig:canny}
 \end{figure*}
 
-Fig. \ref{fig:canny} shows how the \textbf{Canny edge conditioning} can be used to control the diffusion process,
+Figure~\ref{fig:canny} shows how the \textbf{Canny edge conditioning} can be used to control the diffusion process,
 resulting in new images with the same structure but different styles and subjects.
 The automatic prompt was generated by BLIP based on the default image.
 
@@ -431,13 +441,17 @@ a LoRA model must be used with a \textbf{SD model checkpoint file}.
 In This case, LoRA applies small changes to the \textbf{cross-attention layers} by adding its 
 weights to their weights matrices.
 LoRA achieves a smaller file size by breaking its weight matrix into \textbf{two low-rank matrices}.
+
+\todo[inline]{Va rifatta per copyright [Edoardo] }
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.5]{img/background_img/LoRA.png}
 	\caption{LoRA reparametrazation \cite{hu2021lora}.}
 	\label{fig:lora}
 \end{figure}
-Fig. \ref{fig:lora} shows LoRA reparametrazation technique. Let us condiser a 
+
+Figure~\ref{fig:lora} shows LoRA reparametrazation technique. Let us condiser a 
 pre-trained weight matrix $W_0 \in \mathbb{R}^{d\times k}$, we can constrain its update
 by representing it as a \textbf{low-rank decomposition} $W_0 = \Delta W=W_0+BA$, where $B \in \mathbb{R}^{d \times r}$,
 $A= \in \mathbb{R}^{r \times k}$, and the rank $r \ll min(d,k)$.
@@ -481,7 +495,7 @@ But for this project, we will focus on the \emph{Face Detection} and \emph{Face 
 with six landmarks and multi-face support.
 It is based on \emph{BlazeFace} \cite{bazarevsky2019blazeface}, a lightweight and well-performing 
 face detector tailored for mobile GPU inference.
-In Fig. \ref{fig:face-detection}, we can see how the BlazeFace pipeline is able to detect a face 
+In Figure~\ref{fig:face-detection}, we can see how the BlazeFace pipeline is able to detect a face 
 (highlighted with a red box) in an image, while the green points in the image are an example of a
 \emph{task-specific model}.
 
@@ -493,7 +507,7 @@ by using machine learning to infer the \textbf{3d facial surface} without needin
 This ML pipeline consists of two real-time deep neural networks that work together.
 The first one is a \textbf{detector} based on \emph{BlazeFace} that computes face locations on the full image.
 The second is a \emph{3D face landmark model} \cite{kartynnik2019realtime} that operates on those locations and predicts the 
-approximate 3D surface via regression. Fig. \ref{fig:face-mesh} shows some examples of face mesh predictions applied to two faces.
+approximate 3D surface via regression. Figure~\ref{fig:face-mesh} shows some examples of face mesh predictions applied to two faces.
 
 
 \subsection{Deepfakes}
@@ -503,6 +517,7 @@ This user created a space on the online news and aggregation site where they sha
 Deepfakes use various generative models to analyze and learn from a large dataset of real images and videos and generate new ones remarkably similar to the original data.
 This technology has been used to create realistic-looking videos of people doing things they never actually did or saying things they never actually said. 
 For example, Deepfake videos have been created that show political leaders saying things they never actually said or celebrities in compromising or embarrassing situations.
+
 While Deepfakes have some harmless uses, such as creating digital avatars for gaming and entertainment, they also pose a significant risk to society. 
 Deepfakes can be used to spread disinformation and fake news, damage reputations, and even manipulate elections.
 
@@ -524,8 +539,8 @@ This architecture commonly uses \textbf{multiple hidden layers} between the enco
 with fewer neurons than the number of input image pixels, creating a latent image representation. 
 The generation of Deepfakes with AE consists of three significant steps.
 First, an encoder is trained to produce feature maps for \textbf{both faces class}, while a decoder is trained as a \textbf{measure of encoder accuracy}. 
-Then, as shown in Fig. \ref{fig:training-ae}, \textbf{two decoders are trained} separately to reproduce images from both classes. Finally, \textbf{decoders are switched} to produce
-images from one class based on feature maps from the other, illustrated in Fig. \ref{fig:generation-ae}.
+Then, as shown in Figure~\ref{fig:training-ae}, \textbf{two decoders are trained} separately to reproduce images from both classes. Finally, \textbf{decoders are switched} to produce
+images from one class based on feature maps from the other, illustrated in Figure~\ref{fig:generation-ae}.
 This same method can be applied to generate Deepfakes with VAE (Section \ref{sec:vae}), the only difference being \textbf{how the latent
 	vector is obtained}.
 
@@ -536,9 +551,11 @@ This same method can be applied to generate Deepfakes with VAE (Section \ref{sec
 	\caption{VAE/GAN network \cite{larsen2016autoencoding}.}
 	\label{fig:vae-gan}
 \end{figure}
+\todo[inline]{Va rifatta, non possiamo usare le immagini di altri: copyright. Vale per tutte le immagini [Edoardo] }
+
 \emph{VAE/GAN} \cite{larsen2016autoencoding} is a combination of \emph{Variational Autoencoders} and \emph{Generative Adversarial Networks}
 that leverages learned representations to better measure similarities in data space.
-Fig. \ref{fig:vae-gan} shows how it is possible to combine a VAE with a GAN by \textbf{collapsing} the VAE decoder and the GAN generator 
+Figure~\ref{fig:vae-gan} shows how it is possible to combine a VAE with a GAN by \textbf{collapsing} the VAE decoder and the GAN generator 
 into one and then letting them share parameters and training them jointly. 
 This unsupervised generative model simultaneously learns to encode, generate, and compare datasets samples. 
 The method used to generate Deepfakes is similar to the one explained in Section \ref{sec:deep-vae} while achieving 
@@ -562,24 +579,25 @@ better results by leveraging the GAN discriminator.
 
 
 
-\section{Project} \label{ch:project}
-In this chapter, we will see how all the technologies presented in the previous 
-chapter can be used to create an application to generate Deepfakes through Stable Diffusion. 
+\section{Our Approach} \label{ch:project}
+In this section, we will see how all the technologies presented in the previous 
+section can be used to create an application to generate Deepfakes through Stable Diffusion. 
 Starting from how the input video needs to be processed. 
 We will then understand how we can use LoRA and Stable Diffusion with ControlNet to 
 generate images of a target subject and how these images can be applied to the input video, 
 creating a real Deepfake. 
 Finally, we will understand the problems of this process and how they can be improved.
 \subsection{Infographic} \label{sec:project_info}
+
+\todo[inline]{Va rifatta pipeline in modo che sia leggibile su una pagina anche in verticale}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1.1\textwidth, keepaspectratio]{img/project_img/infografica.png}
 	\caption{The entire pipeline used to create Deepfakes.}
 	\label{fig:project}
-	
-	
 \end{figure}
-In Fig. \ref{fig:project}, we can see the entire \textbf{pipeline} used to create Deepfakes from a video source. 
+
+In Figure~\ref{fig:project}, we can see the entire \textbf{pipeline} used to create Deepfakes from a video source. 
 First, the input video is decreased to 12 frames per second. 
 Then for every frame, by using \emph{MediaPipe}, we can extrapolate face locations and their structure. 
 Next, the structure created with \emph{Face Mesh} is processed to create a mask for the latter application of the diffused image, 
@@ -590,6 +608,8 @@ Finally, every diffused image gets applied to the corresponding input frame and 
 In the following sections, we will further elaborate on every step of this process. 
 
 \subsection{Video Preprocessing} \label{sec:video_preprocessing}
+
+\todo[inline]{Metti una riassunto di cosa vediamo nelle prossime subsubsection, una per una: in Section 3.2.1...., then in Section 3.2.2 ....}
 
 \subsubsection{Decreasing Frame Rate} \label{sec:decreasing_frame_rate}
 
@@ -644,7 +664,7 @@ The bounding box is composed of $xmin$ and $width$ by $ymin$ and $height$, all n
 At the same time, each key point is composed of $x$ and $y$, which are also normalized to [0.0,1.0] by the image width and height, respectively. 
 Since the bounding box is right on the face, a \textbf{padding of 30 pixels} was added to ensure a full face capture.
 Then all the bounding box points get saved to a \emph{PKL file} for later use. 
-An example of a cropped frame can be seen in Fig. \ref{fig:cropped}.
+An example of a cropped frame can be seen in Figure~\ref{fig:cropped}.
 After cropping, all the images are resized to $512 \times 512$ to ensure further \textbf{coherence} during diffusion. 
 The next step is to compute the face mask. 
 This is done through \emph{MediPipe Face Mesh} that, given an input frame, returns a list of \textbf{468 face landmarks} 
@@ -689,17 +709,17 @@ and an example can be seen in Fig. \ref{fig:mask-noblur}.
 This image can be used to do \emph{soft masking} of the diffused image by making transparent all 
 pixels corresponding to a black pixel on the mask. 
 The problem with applying this mask is that it would result in a \textbf{detectable compositing} due to the straight borders, 
-as we can see in Fig. \ref{fig:mask-final-error}. 
+as we can see in Figure~\ref{fig:mask-final-error}. 
 To solve this problem, we need to smooth all the borders of the mask. 
 This was done through multiple steps of \textbf{erosion} and \textbf{Gaussian blur}, 
-resulting in a mask with smooth borders that can be seen in Fig. \ref{fig:mask}.
+resulting in a mask with smooth borders that can be seen in Figure~\ref{fig:mask}.
 
 \subsection{Stable Diffusion WebUI} \label{sec:stable_diffusion_webui}
 
 
 A browser interface based on \emph{Gradio library}\footnote{Gradio website: \url{https://gradio.app/}} 
 created by AUTOMATIC1111\footnote{Stable Diffusion WebUI github: \url{https://github.com/AUTOMATIC1111/stable-diffusion-webui}} 
-(Fig. \ref{fig:webui}) 
+(Figure~\ref{fig:webui}) 
 was used to operate Stable Diffusion. 
 This interface offers all Stable Diffusion modules optimized for \textbf{lower VRAM usage}, down to 2GB. 
 The software creates a \textbf{local server on port 7860} and, 
@@ -712,7 +732,7 @@ where ModelName is the name of the model file without the extension,
 and $\alpha$ is the weight applied to the LoRA model that goes from 0 to 1 (with 0 the model is disabled). 
 
 Given that the application developed for this project is standalone, 
-we need a way to communicate with the web UI. We can use the \emph{API}  (shown in Fig. \ref{fig:api}) 
+we need a way to communicate with the web UI. We can use the \emph{API}  (shown in Figure~\ref{fig:api}) 
 the local server offers for this.
 We can communicate with the Stable Diffusion web UI through simple 
 POST and GET requests through an \textbf{HTTP communication}. 
@@ -754,15 +774,20 @@ Ultimately, the \textbf{controlnet units} represent which preprocessing module a
 This payload is then sent to ``\textbf{127.0.0.1:7860/controlnet/img2img}'' for processing. 
 The \textbf{response} is composed of two images, the first one is the image generated with Stable Diffusion, 
 and the second one is the result of the ControlNet canny preprocessing of the input image.
+
 \subsection{LoRA Training WebUI} \label{sec:lora_training_webui}
+
+\todo{Questa non si vedrà mai come immagine. Idee? Descrivi tutta l'interfaccia e  metti solo un pezzetto di esempio come immagine? [Edoardo]}
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=15cm, keepaspectratio]{img/project_img/lora.png} 
 	\caption{LoRA training webUI.}
 	\label{fig:lora-webui}
 \end{figure}
+
 To train a LoRA model, a \emph{Windows-focused Gradio GUI}\footnote{Kohya webui github: \url{https://github.com/bmaltais/kohya_ss}}
-(shown in Fig. \ref{fig:lora-webui}) 
+(shown in Figure~\ref{fig:lora-webui}) 
 for \emph{Kohya's Stable Diffusion trainers}\footnote{Kohya ss scripts github: \url{https://github.com/kohya-ss/sd-scripts}} was used. 
 The GUI allows us to set the training parameters and run the required 
 CLI commands to train the model with just \textbf{7GB of VRAM}. 
@@ -805,7 +830,7 @@ to generate all the captions for us.
 \end{figure}
 
 
-We take as an example Fig. \ref{fig:santini-training}, 
+We take as an example Figure~\ref{fig:santini-training}, 
 and then BLIP captioning generates the following caption 
 where we add the name of our target subject as an \textbf{identifier} at the start:\\\\
 ``Francesco Santini a bald man with a beard and a black shirt''\\\\
@@ -824,7 +849,7 @@ that needs to be added to the Stable Diffusion web UI and is now ready for diffu
 As said before, during the creation of the training dataset, we need to have multiple 
 light conditions for our target subject. 
 Therefore, a custom light was developed to obtain this result in a controlled way.
-This light, shown in Fig. \ref{fig:light}, is constructed with recycled materials.
+This light, shown in Figure~\ref{fig:light}, is constructed with recycled materials.
 The external wood frame comprises two picture frames fixed with nails to ensure stability. 
 In addition, one glass plate is used as an insulator to separate the LEDs from the aluminum refractor.
 The other plate, modified with two layers of plastic light diffusers, 
@@ -839,7 +864,8 @@ The handle is part of a pipe clamp glued on top to make the light easier to hold
 \end{figure}
 
 The light is generated by an array of 100 RGB LEDs (WS2812B) that need a 5V, 50W external power supply. 
-The circuit is shown in Fig. \ref{fig:light-circuit} and helps us understand how the light works. 
+The circuit is shown in Figure~\ref{fig:light-circuit} and helps us understand how the light works. 
+
 First, an \emph{Arduino Nano} controls all the logic and has its own power supply. 
 Next, the board is connected via a digital pin to the LED strip and is protected 
 from \textbf{signals reflections} by a $330\Omega$ resistor. 
@@ -847,7 +873,8 @@ A $500 \mu F$ capacitor is used on the LED powerline to help provide current
 while the power supply adjusts to the \textbf{varying load demands}. 
 Since we also need a signal return for the LED data pin, the board's ground was 
 connected to the power supply's ground. 
-Finally, two buttons and one potentiometer are connected to the Arduino Uno to give tactile 
+
+Finally, two buttons and one potentiometer are connected to the Arduino Uno\todo{Uno o Nano? O tutti e due? non si capisce [Edoardo]} to give tactile 
 control over the light. 
 The potentiometer controls the intensity of the light, 
 while the two buttons give us access to a menu. 
@@ -884,7 +911,7 @@ The number of \textbf{diffusion steps} will result in a less detailed image with
 a more detailed image with higher values. 
 It is essential to notice that a high number of steps will result in the model 
 ``hallucinating'' too many details, distorting the final image.
-In Fig. \ref{fig:grid-santini}, we can see how the \textbf{denoising strength} (on the left) 
+In Figure~\ref{fig:grid-santini}, we can see how the \textbf{denoising strength} (on the left) 
 and the \textbf{$\alpha$ parameter} (on top) of the LoRA model affect the diffusion. 
 The denoising strength describes how much the final image will resemble the original one, 
 while $\alpha$ indicates the weight of the LoRA model. 
@@ -900,7 +927,7 @@ Deepfake generation when a LoRA model is used.
 If we did not use a LoRA model and instead a pure Stable Diffusion model, 
 it is crucial to consider the \textbf{CFG scale}. 
 This parameter indicates how much the diffusion process will adhere to the prompt. 
-For example, in Fig. \ref{fig:cfg-examples}, we can see how it affects the final image. 
+For example, in Figure~\ref{fig:cfg-examples}, we can see how it affects the final image. 
 Like the number of steps, a higher value will result in a distorted output. 
 However, a lower value will not affect the original image resulting in an almost identical output. 
 Through testing, the optimal CFG scale value was around 7.
@@ -926,11 +953,11 @@ The final thing to consider is the \textbf{ControlNet canny preprocessing}.
 The canny preprocessing is controlled through a low threshold and a high threshold. 
 Unfortunately, at the time of writing this paper, there are no ways of 
 controlling these two through the API.
-Our objective, in this case, is to obtain an image similar to Fig. \ref{fig:canny-project}, 
+Our objective, in this case, is to obtain an image similar to Figure~\ref{fig:canny-project}, 
 where essential parts like mouth, nose shape, and eyes are highlighted without too many details. 
 Furthermore, this image will produce an optimal and consistent generation through each frame, 
 further helping to resolve the non-deterministic behavior of Stable Diffusion.
-Differently,  an image similar to Fig. \ref{fig:canny-error} will have too many details to be computed, 
+Differently,  an image similar to Figure~\ref{fig:canny-error} will have too many details to be computed, 
 resulting in a distorted output.
 
 
@@ -950,7 +977,7 @@ Then, to find where to apply them, the software utilizes the \emph{PKL file}
 containing all the original bounding box sizes and locations. 
 First, the image gets resized to its original size and then pasted 
 to its correct position on the initial frame with its mask. 
-An example of a final frame can be seen in Fig. \ref{fig:output}.
+An example of a final frame can be seen in Figure~\ref{fig:output}.
 Ultimately, all the final frames get united into a single \textbf{12 FPS AVI file} with the help of OpenCV.
 
 \subsection{GUI} \label{sec:gui}
@@ -974,9 +1001,9 @@ Following are the descriptions of each page.
 \end{figure}
 
 
-The file menu (Fig. \ref{fig:file-menu}) lets users choose which video file to process through 
+The file menu (Figure~\ref{fig:file-menu}) lets users choose which video file to process through 
 an ``\textbf{Open File}'' button. 
-The ``\textbf{Process}'' button starts the preprocessing explained in section \ref{sec:video_preprocessing}, 
+The ``\textbf{Process}'' button starts the preprocessing explained in Section~\ref{sec:video_preprocessing}, 
 while the custom QtWidget shows each step. 
 A \textbf{label} showing the current file being processed with a corresponding \textbf{progress bar} 
 was employed to display the overall progress explicitly. 
@@ -998,7 +1025,7 @@ where it is possible to use Stable Diffusion.
 
 
 
-The diffusion window (Fig. \ref{fig:diffusion-menu}) comprises an \textbf{image viewer} that 
+The diffusion window (Figure~\ref{fig:diffusion-menu}) comprises an \textbf{image viewer} that 
 shows the cropped frames, where each frame can be cycled with the two \textbf{side buttons}. 
 The \textbf{two progress bars} respectively indicate the overall and 
 specific progress (testing, diffusion, frame application, and video generation). 
@@ -1021,7 +1048,7 @@ After the video is generated, the user gets redirected to the video export tab.
 	\label{fig:video-player}
 \end{figure}
 
-The video export window (Fig. \ref{fig:video-player}) offers a complete \textbf{video player} 
+The video export window (Figure~\ref{fig:video-player}) offers a complete \textbf{video player} 
 to see the results and the possibility of \textbf{saving the file} to a specific location. 
 The last button lets the user exit the application and clean all the generated data.
 
@@ -1037,7 +1064,7 @@ The last button lets the user exit the application and clean all the generated d
 \end{figure}
 
 
-The training helper window (Fig. \ref{fig:training-helper}) offers a companion for the 
+The training helper window (Figure~\ref{fig:training-helper}) offers a companion for the 
 LoRA training webUI (Section \ref{fig:lora-webui}). 
 The window comprises \textbf{one file input} for the dataset video and \textbf{three directory inputs} 
 for the directories needed for the LoRA training. 
@@ -1085,6 +1112,9 @@ The GUI presented was to test all the components organically.
 However, the software could effortlessly become a \textbf{mobile application}, 
 doing heavy calculations on a server, opening the possibility to widespread use.
 
+
+\section{Related Work}\label{sect:related}
+\todo[inline]{articoli recenti su deep fake e stable diffusion [Santini]}
 
 
 \section{Conclusion}\label{ch:conclusion}
