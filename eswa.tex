@@ -4,7 +4,7 @@
 
 
 \usepackage{subcaption}
-\usepackage{graphicx}
+
 \usepackage{hyperref}
 \usepackage[table,xcdraw]{xcolor}
 \usepackage[utf8]{inputenc}
@@ -14,7 +14,7 @@
 \usepackage{url}
 \usepackage{pythonhighlight}
 
-\usepackage[inkscapeformat=png]{svg}
+\usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
@@ -65,11 +65,11 @@
 
 
 \begin{abstract} 
-???
+We propose a new technique to generate deepfake videos based on Stable Diffusion, ControlNet and Low-Rank Adaptation
 \end{abstract}
 
 \begin{keyword}
-abstract argumentation, weighted attacks, sceptical semantics, unicity, well-founded frameworks.
+Deepkafe, Stable Diffusion, ControlNet, Low-Rank Adaptation.
 \end{keyword}
 \end{frontmatter}
 
@@ -80,8 +80,15 @@ abstract argumentation, weighted attacks, sceptical semantics, unicity, well-fou
 
 
 Deepfakes have become a popular subject of discussion in recent years. 
-Advances in machine learning and artificial intelligence have made it possible to 
+Despite the fact that digital picture and video creation and modification are not new (e.g., \cite{farid}), advances in machine learning and artificial intelligence have made it possible to 
 create highly realistic digital media that can deceive even the most discerning eye. 
+
+The first deepfake content was a celebrity pornographic movie made by a Reddit user named ``deepfakes'' in 2017 (soon banned from the platform\footnote{Reddit bans 'deepfakes' face-swap porn community: \url{https://www.theguardian.com/technology/2018/feb/08/reddit-bans-deepfakes-face-swap-porn-community}.}). FakeApp, FaceSwap, and other deepfake-based applications started to arise shortly after. 
+The term ``deepfakes'' has been applied more generally to any AI-generated videos that impersonate human beings.
+There are now three main categories of deepfake videos, which involve \emph{i)} \emph{head puppetry}, the target person's entire head and upper-shoulders are synthesized from a video of the source person's head, giving the synthesized target the appearance of the source; \emph{ii)} \emph{face swapping} is the process of creating a video of the target with the faces of the source's synthesized faces swapped in while maintaining the same facial emotions; \emph{iii)} \emph{lip syncing}, in which the target is made to appear to pronounce words that they do not actually say by just moving the lip region.
+
+
+
 However, creating convincing Deepfakes that are both stable and high-quality has proven 
 to be challenging, requiring advanced techniques and algorithms. 
 In this thesis, we will explore a novel approach to Deepfakes creation using 
@@ -125,9 +132,9 @@ In the following sections, we will analyze the most common generative models.
 
 \subsubsection{Generative Adversarial Networks (GAN)}\label{sec:gan}
 
-\begin{figure}[H]
+\begin{figure}[b]
 	\centering
-    \includesvg{img/svg/GAN.svg}
+    \includegraphics[scale=0.8]{img/svg/GAN.png}
 	\caption{Overview of GAN.}\label{fig:gan}
 \end{figure}
 
@@ -139,9 +146,9 @@ The generator and the discriminator are trained simultaneously in an adversarial
 
 \subsubsection{Variational Autoencoders (VAE)} \label{sec:vae}
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-    \includesvg{img/svg/VAE.svg}
+    \includegraphics[scale=0.8]{img/svg/VAE.png}
     \caption{Overview of VAE.}\label{fig:vae}
 \end{figure}
 
@@ -156,9 +163,9 @@ The variational encoder maps the input image into a \emph{multivariate normal di
 The continuous nature of VAE's latent space allows for generating meaningful interpolations between images, and it also means that VAE \textbf{implicitly learns the data distribution}. In Figure~\ref{fig:vae}, we can observe the architecture of a VAE, where $X$ represents the input data, $q_\phi(Z|X)$ signifies the \textbf{encoder network} that maps $X$ to a distribution in the latent space $Z$, and $p_\theta(X|Z)$ represents the \textbf{decoder network} that maps $Z$ back to the data space $X'$.
 
 \subsubsection{Flow-based Models} \label{sec:flow}
-\begin{figure}[H]
+\begin{figure}[b]
 	\centering
-    \includesvg{img/svg/FB.svg}
+    \includegraphics[scale=0.8]{img/svg/FB.png}
     \caption{Overview of a Flow-based Model.}\label{fig:flow}
 \end{figure}
 
@@ -172,9 +179,9 @@ therefore, they do not allow data compression by default, making them \textbf{co
 
 \subsubsection{Diffusion Models} \label{sec:diff}
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-    \includesvg{img/svg/DIFF.svg}
+    \includegraphics[scale=0.8]{img/svg/DIFF.png}
     \caption{Overview of a Diffusion Model.}\label{fig:diff-arch}
 \end{figure}
 
@@ -190,12 +197,6 @@ In the case of images, a diffusion model is composed of two processes:
 \end{itemize}
 
 
-\subsubsection{Forward Diffusion Process}
-\begin{figure}[H]
-	\centering
-    \includegraphics[scale=0.76, keepaspectratio]{img/background_img/Diffusion2.png}
-	\caption{The directed graphical model.}\label{fig:m-chain}
-\end{figure}
 
 
 Let $q(x_0)$ be the real data distribution; then, we can sample from this distribution to get an image, $x_0 \sim q(x_0)$. 
@@ -226,6 +227,14 @@ And in the original form as
 \end{equation}
 This makes possible to sample $x_t$ at any arbitrary noise level conditioned on $x_0$,
 meaning that we don't need to apply $q$ repeatedly to sample $x_t$.
+
+
+\subsubsection{Forward Diffusion Process}
+\begin{figure}[b]
+	\centering
+	\includegraphics[scale=0.74, keepaspectratio]{img/background_img/Diffusion2.png}
+	\caption{The directed graphical model.}\label{fig:m-chain}
+\end{figure}
 
 
 \paragraph{Reverse Diffusion Process}\mbox{}\\
@@ -300,13 +309,12 @@ by using a simple \textbf{mean squared error} (MSE) between the true and the pre
     \end{algorithmic}
 \end{algorithm}
 
-\newpage
 
 \paragraph{Conditional U-Net}\mbox{}\\
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-    \includesvg[]{img/svg/UNET.svg}
+    \includegraphics[scale=0.85]{img/svg/UNET.png}
 	\caption{U-net architecture.}\label{fig:unet}
 \end{figure}
 
@@ -356,9 +364,9 @@ Stable Diffusion also accepts \textbf{textual prompts} as a conditioning input, 
 
 \subsubsection{The architecture}\label{sec:ldm-architecture} 
 
-\begin{figure}[H]
+\begin{figure}[b]
 	\centering
-    \includesvg[]{img/svg/SDArch.svg}
+    \includegraphics[scale=0.9]{img/svg/SDArch.png}
 	\caption{The LDM architecture with the conditioning mechanism.}\label{fig:ldm-architecture}
 \end{figure}
 
@@ -381,9 +389,9 @@ CLIP stands for \textbf{Constastive Language-Image Pretraining} and is an open-s
 Given an image and text descriptions, the model can predict the most relevant text description for that image without 
 optimizing for a particular task.
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-    \includesvg[]{img/svg/Clip.svg}
+    \includegraphics[scale=0.85]{img/svg/Clip.png}
 	\caption{The training steps of CLIP.}\label{fig:clip-training}
 \end{figure}
 
@@ -433,9 +441,9 @@ In comparison, a lower noise strength value will cause the diffused image to be 
 pre-trained image diffusion models with task-specific conditions. 
 The model manipulates the input conditions of network blocks to control the overall behavior of an entire neural network.
 
-\begin{figure}[H]
+\begin{figure}[b]
 	\centering
-    \includesvg[]{img/svg/Controlnet1.svg}
+    \includegraphics[scale=0.8]{img/svg/Controlnet1.png}
 	\caption{Application of ControlNet to an arbitrary neural network block.}\label{fig:controlnet}
 \end{figure}
 
@@ -467,14 +475,14 @@ where $y_c$ is the output of the ControlNet block.
 Thanks to the zero convolution layers, when ControlNet is applied to some neural networks block, 
 it will not cause any changes to the deep neural features before optimization, resulting in $y=y_c$.
 Next, the paper's authors show how having a zero convolution layer does not influence the weight 
-and bias gradients as long as the condition vectors are non-zero, but the datasets ensure this.\\\\
+and bias gradients as long as the condition vectors are non-zero, but the datasets ensure this.
 ``In this way, the 
 zero convolutions become an unique type of connection layer that progressively grow from zeros to
-optimized parameters in a learned way'' \cite{zhang2023adding}.\\
+optimized parameters in a learned way'' \cite{zhang2023adding}.
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-    \includesvg[]{img/svg/Controlnet2.svg}
+    \includegraphics[scale=0.8]{img/svg/Controlnet2.png}
 	\caption{Application of ControlNet to Stable Diffusion architecture.}\label{fig:controlnet-2}
 \end{figure}
 
@@ -503,9 +511,9 @@ Here are all the types of conditioning available with ControlNet:
 	\item Cartoon Line Drawing.
 \end{itemize}
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-	\includegraphics[width=12cm, keepaspectratio]{img/background_img/ControlnetDemo.png}
+	\includegraphics[scale=0.8]{img/background_img/ControlnetDemo.png}
 	\caption{Controlling Stable Diffusion with Canny edges.}
 	\label{fig:canny}
 \end{figure}
@@ -534,9 +542,9 @@ weights to their weights matrices.
 LoRA achieves a smaller file size by breaking its weight matrix into \textbf{two low-rank matrices}.
 
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-    \includesvg[scale=0.8]{img/svg/LoRA.svg}
+    \includegraphics[scale=0.62]{img/svg/LoRA.png}
 	\caption{LoRA reparametrazation.}\label{fig:lora}
 \end{figure}
 
@@ -547,19 +555,16 @@ by representing it as a \textbf{low-rank decomposition} $W_0 = \Delta W=W_0+BA$,
 $A= \in \mathbb{R}^{r \times k}$, and the rank $r \ll min(d,k)$.
 During training, $W_0$ is frozen, wile $A$ and $B$ trainable parameters.
 For $h = W_0x$, the forward pass yields:
+
 \begin{equation}
 	h = W_0x + \Delta Wx = W_0x + BAx
 \end{equation}
 $A$ is initialized to a random Gaussian and $B$ is initialized to zero, so that
 $\Delta W = BA$ is zero.
 
-\subsection{MediaPipe}
 
-\begin{figure}[H]
-	\centering
-    \includegraphics[scale=0.8, keepaspectratio]{img/background_img/MediapipeDemo.png}
-	\caption{Example of Face Detection and Face Mesh.}\label{fig:MediapipeDemo}
-\end{figure}
+
+\subsection{MediaPipe}
 
 \emph{MediaPipe}\footnote{MediaPipe web page: \url{https://mediapipe.dev/}} 
 is an open-source framework for building pipelines to perform computer vision 
@@ -594,6 +599,13 @@ with six landmarks and multi-face support.
 It is based on \emph{BlazeFace} \cite{bazarevsky2019blazeface}, a lightweight and well-performing 
 face detector tailored for mobile GPU inference.
 In Figure~\ref{fig:MediapipeDemo}, we can see how the BlazeFace pipeline is able to detect a face, defined by the red bounding box, while the six green dots represent the detected landmarks.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.65, keepaspectratio]{img/background_img/MediapipeDemo.png}
+	\caption{Example of Face Detection and Face Mesh.}\label{fig:MediapipeDemo}
+\end{figure}
+
 
 \paragraph{Face Mesh}
 
@@ -631,11 +643,11 @@ $L_2$-norm), which measures the distance between the output of the decoder and t
 
 
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-    \includegraphics[scale=0.7, keepaspectratio]{img/background_img/Training-AE.png}
+    \includegraphics[scale=0.6, keepaspectratio]{img/background_img/Training-AE.png}
     \caption{Decoder training.}\label{fig:training-ae}
-	\includegraphics[scale=0.7, keepaspectratio]{img/background_img/Generation-AE2.png}
+	\includegraphics[scale=0.6, keepaspectratio]{img/background_img/Generation-AE2.png}
 	\caption{Generation of Deepfakes.}\label{fig:generation-ae}
 \end{figure}
 
@@ -648,14 +660,13 @@ The generation of Deepfakes with AE consists of three significant steps.
 First, an encoder is trained to produce feature maps for \textbf{both faces class}, while a decoder is trained as a \textbf{measure of encoder accuracy}. 
 Then, as shown in Figure~\ref{fig:training-ae}, \textbf{two decoders are trained} separately to reproduce images from both classes. Finally, \textbf{decoders are switched} to produce
 images from one class based on feature maps from the other, illustrated in Figure~\ref{fig:generation-ae}.
-This same method can be applied to generate Deepfakes with VAE (Section \ref{sec:vae}), the only difference being \textbf{how the latent
-	vector is obtained}.
+This same method can be applied to generate Deepfakes with VAE (Section \ref{sec:vae}), the only difference being \textbf{how the latent vector is obtained}.
 
 \subsubsection{Deepfakes with VAE/GAN}
 
-\begin{figure}[H]
+\begin{figure}[b]
 	\centering
-    \includesvg[scale=0.9]{img/svg/VaeGan.svg}
+    \includegraphics[scale=0.75]{img/svg/VaeGan.png}
 	\caption{VAE/GAN network.}\label{fig:vae-gan}
 \end{figure}
 
@@ -667,19 +678,6 @@ into one and then letting them share parameters and training them jointly.
 This unsupervised generative model simultaneously learns to encode, generate, and compare datasets samples. 
 The method used to generate Deepfakes is similar to the one explained in Section \ref{sec:deep-vae} while achieving 
 better results by leveraging the GAN discriminator.
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -698,9 +696,9 @@ Finally, we will understand the problems of this process and how they can be imp
 
 \subsection{Infographic} \label{sec:project_info}
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-	\includesvg[scale=0.77]{img/svg/Info.svg}
+	\includegraphics[scale=0.65]{img/svg/Info.png}
 	\caption{Pipeline.}\label{fig:project}
 \end{figure}
 
@@ -724,11 +722,7 @@ In Section ~\ref{sec:face_detection}, we will focus on automating the cropping o
 
 \subsubsection{Decreasing Frame Rate} \label{sec:decreasing_frame_rate}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.2, keepaspectratio]{img/project_img/init.png}
-	\caption{Example of an input frame.}\label{fig:init-frame}
-\end{figure}
+
 
 
 The first step of the \textbf{preprocessing pipeline} is decreasing the frame rate to \textbf{12 FPS}. 
@@ -746,19 +740,29 @@ This frame will be used as a base for all the following examples.
 
 
 
+
 \subsubsection{Face Detection and Face Mesh} \label{sec:face_detection}
 
-\begin{figure}[H]
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.18, keepaspectratio]{img/project_img/init.png}
+	\caption{Example of an input frame.}\label{fig:init-frame}
+\end{figure}
+
+
+
+\begin{figure}[t]
 	\centering
 	\begin{subfigure}[b]{0.5\textwidth}
 		\centering
-		\includegraphics[width=4cm, keepaspectratio]{img/project_img/cropped.png}
+		\includegraphics[width=3.5cm, keepaspectratio]{img/project_img/cropped.png}
 		\caption{Cropped frame.}\label{fig:cropped}
 	\end{subfigure}%
 	\hfill
 	\begin{subfigure}[b]{0.5\textwidth}
 		\centering
-		\includegraphics[width=4cm, keepaspectratio]{img/project_img/mask-blur.png}
+		\includegraphics[width=3.5cm, keepaspectratio]{img/project_img/mask-blur.png}
 		\caption{Face mask.}\label{fig:mask}
 	\end{subfigure}
 	\caption{Outputs from MediaPipe preprocessing.}\label{fig:project-mediapipe}
@@ -773,6 +777,9 @@ To achieve this result, we use \emph{MediaPipe Face Detection} that, given an in
 returns a \textbf{proto message} that contains a \textbf{bounding box} and \textbf{six key points} (right eye, left eye, nose tip, mouth center, right ear tragion, and left ear tragion). 
 The bounding box is composed of $xmin$ and $width$ by $ymin$ and $height$, all normalized to [0.0,1.0]. 
 At the same time, each key point is composed of $x$ and $y$, which are also normalized to [0.0,1.0] by the image width and height, respectively. 
+
+\FloatBarrier
+
 Since the bounding box is right on the face, a \textbf{padding of 30 pixels} was added to ensure a full face capture.
 Then all the bounding box points get saved to a \emph{PKL file} for later use. 
 An example of a cropped frame can be seen in Figure~\ref{fig:cropped}.
@@ -782,6 +789,9 @@ This is done through \emph{MediPipe Face Mesh} that, given an input frame, retur
 where each landmark is composed of $x$, $y$, and $z$, all normalized to  [0.0, 1.0]. 
 Next, we must find the \emph{convex hull} of all the returned landmarks to locate the face mask points, considering only the $x$ and $y$ coordinates. 
 This was done with \emph{Graham's scan algorithm} \cite{GRAHAM1972132} that works in $O(n log n)$ time. Let us consider an array of $n$ points, following is Graham's scan algorithm:
+
+
+
 \begin{enumerate}
 	\item Find the point with the lowest $y$ coordinate, breaking ties by choosing the point with the lowest $x$ coordinate. 
 	Let this point be $P_0$. Put $P_0$ at first position in the output hull.
@@ -798,17 +808,17 @@ This was done with \emph{Graham's scan algorithm} \cite{GRAHAM1972132} that work
 	\item The points in $S$ are the output convex hull.
 \end{enumerate}
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
 	\begin{subfigure}[b]{0.5\textwidth}
 		\centering
-		\includegraphics[width=4cm, keepaspectratio]{img/project_img/mask.png}
+		\includegraphics[width=3.5cm, keepaspectratio]{img/project_img/mask.png}
 		\caption{Mask without processing.}\label{fig:mask-noblur}
 	\end{subfigure}%
 	\hfill
 	\begin{subfigure}[b]{0.5\textwidth}
 		\centering
-		\includegraphics[width=4cm, keepaspectratio]{img/project_img/final-erorr.png}
+		\includegraphics[width=3.5cm, keepaspectratio]{img/project_img/final-erorr.png}
 		\caption{The output with the same mask.}\label{fig:mask-final-error}
 	\end{subfigure}
 	\caption{Mask and its application without processing.}\label{fig:eroor-mediapipe}
@@ -816,7 +826,7 @@ This was done with \emph{Graham's scan algorithm} \cite{GRAHAM1972132} that work
 
 
 After finding the convex hull, we can draw a white polygon on a black background corresponding to the \textbf{face mask}, 
-and an example can be seen in Fig. \ref{fig:mask-noblur}. 
+and an example can be seen in Figure~\ref{fig:mask-noblur}. 
 This image can be used to do \emph{soft masking} of the diffused image by making transparent all 
 pixels corresponding to a black pixel on the mask. 
 The problem with applying this mask is that it would result in a \textbf{detectable compositing} due to the straight borders, 
@@ -894,7 +904,7 @@ and the second one is the result of the ControlNet canny preprocessing of the in
 	\label{fig:lora-webui}
 \end{figure*}
 
-To train a LoRA model, a \emph{Windows-focused Gradio GUI}\footnote{Kohya webui github: \url{https://github.com/bmaltais/kohya_ss}} for \emph{Kohya's Stable Diffusion trainers}\footnote{Kohya ss scripts github: \url{https://github.com/kohya-ss/sd-scripts}} was used. 
+To train a LoRA model, a \emph{Windows-focused Gradio GUI}\footnote{Kohya webui github: \url{https://github.com/bmaltais/kohya_ss}.} for \emph{Kohya's Stable Diffusion trainers}\footnote{Kohya ss scripts github: \url{https://github.com/kohya-ss/sd-scripts}.} was used. 
 The GUI allows us to set the training parameters and run the required 
 CLI commands to train the model with just \textbf{7GB of VRAM}. 
 The first step is to prepare the dataset. For this purpose, 
@@ -928,7 +938,7 @@ We do not want to do this process by hand for all the dataset.
 Instead, we can use \emph{Bootstrapping Language-Image Pre-training} (BLIP) captioning \cite{li2022blip} 
 to generate all the captions for us. 
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
 	\includegraphics[scale=0.3, keepaspectratio]{img/project_img/santini-training.png}
 	\caption{Sample from the training dataset.}
@@ -951,10 +961,10 @@ that needs to be added to the Stable Diffusion web UI and is now ready for diffu
 
 \subsubsection{Custom Light}
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-	\includegraphics[scale=0.27, keepaspectratio]{img/project_img/light.jpeg}
-	\caption{The custom light.}
+	\includegraphics[scale=0.25, keepaspectratio]{img/project_img/light.jpeg}
+	\caption{Our custom light.}
 	\label{fig:light}
 \end{figure}
 
@@ -1031,7 +1041,7 @@ Of course, there are no correct values to use, but through testing,
 a denoising strength of 0.4 and an $\alpha$ of 1 were optimal for
 Deepfake generation when a LoRA model is used. 
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
 	\includegraphics[width=\textwidth, keepaspectratio]{img/project_img/cfg-examples.png}
 	\caption{How the CFG scale affects the image generation.}
@@ -1046,7 +1056,7 @@ Like the number of steps, a higher value will result in a distorted output.
 However, a lower value will not affect the original image resulting in an almost identical output. 
 Through testing, the optimal CFG scale value was around 7.
 
-\begin{figure}[H]
+\begin{figure}[b]
 	\centering
 	\begin{subfigure}[b]{0.5\textwidth}
 		\centering
@@ -1078,9 +1088,9 @@ resulting in a distorted output.
 
 \subsection{Deepfake and Video}
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
-	\includegraphics[scale=0.2, keepaspectratio]{img/project_img/output.png}
+	\includegraphics[scale=0.15, keepaspectratio]{img/project_img/output.png}
 	\caption{Example of an output frame.}
 	\label{fig:output}
 \end{figure}
@@ -1196,21 +1206,22 @@ Finally, as said before, the ``\textbf{Interrupt}'' button allows the user to in
 
 \subsection{Problems and Future Improvements}
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\centering
 	\begin{subfigure}[b]{0.5\textwidth}
 		\centering
-		\includegraphics[scale=0.4]{img/project_img/error-eyebrows.png}
+		\includegraphics[scale=0.34]{img/project_img/error-eyebrows.png}
 		\caption{Error on eyebrows.}\label{fig:error-eyebrows}
 	\end{subfigure}%
 	\hfill
 	\begin{subfigure}[b]{0.5\textwidth}
 		\centering
-		\includegraphics[scale=0.4]{img/project_img/error-eyes.png}
+		\includegraphics[scale=0.34]{img/project_img/error-eyes.png}
 		\caption{Error on eyes.}\label{fig:error-eyes}
 	\end{subfigure}
 	\caption{Examples of errors.}\label{fig:errors}
 \end{figure}
+
 Even though the software can give consistent results, these are far from perfect. 
 In fact, during the development, the main focus was on achieving a \textbf{non-detectable Deepfake}. 
 The \emph{frame-to-frame coherence} problem was resolved through ControlNet 
@@ -1229,7 +1240,9 @@ doing heavy calculations on a server, opening the possibility to widespread use.
 
 
 \section{Related Work}\label{sect:related}
-\todo[inline]{articoli recenti su deep fake e stable diffusion [\textbf{Santini}]}
+The high interest on deepfake generation and detection can also be appreciated in the high number of references in the scientific literature. For example, recent survey are \cite{survey1}.
+
+As previously introduced, the interest of scientists has focused mainly on generation and detection. Considering detection, in \cite{detection1} the authors,
 
 
 \section{Conclusion}\label{ch:conclusion}
