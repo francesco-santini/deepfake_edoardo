@@ -197,7 +197,7 @@ _minted*
 *.wrt
 
 # svg
-#svg-inkscape/
+svg-inkscape/
 
 # sympy
 *.sout
