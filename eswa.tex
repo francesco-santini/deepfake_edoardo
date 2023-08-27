@@ -5,7 +5,7 @@
 
 \usepackage{subcaption}
 
-\usepackage{hyperref}
+%\usepackage{hyperref}
 \usepackage[table,xcdraw]{xcolor}
 \usepackage[utf8]{inputenc}
 \usepackage{setspace}
@@ -24,7 +24,6 @@
 
 \usepackage{enumitem}
 \usepackage{float}
-\usepackage{hyperref}
 \usepackage{tikz}
 \usepackage{multirow}
 \usepackage{todonotes}
@@ -65,7 +64,7 @@
 
 
 \begin{abstract} 
-We propose a new technique to generate deepfake videos based on Stable Diffusion, ControlNet, and Low-Rank Adaptation
+We propose a new technique to generate deepfake videos based on Stable Diffusion, ControlNet, and Low-Rank Adaptation (LoRA).
 \end{abstract}
 
 \begin{keyword}
@@ -76,20 +75,17 @@ Deepkafe, Stable Diffusion, ControlNet, Low-Rank Adaptation.
 %\linenumbers
 
 
-\section{Introduction}
-
-
+\section{Introduction}\label{sec:intro}
 Deepfakes have become a popular subject of discussion in recent years. 
-Despite the fact that digital picture and video creation and modification are not new (e.g., \cite{farid}), advances in machine learning and artificial intelligence have made it possible to 
-create highly realistic digital media that can deceive even the most discerning eye. 
+Despite the fact that digital picture and video creation and modification are not new (e.g., \cite{farid}), advances in machine learning and artificial intelligence have made it possible to create highly realistic digital media that can deceive even the most discerning eye. Simply speaking, deepfakes are synthetic media that have undergone digital manipulation to convincingly swap out one person's likeness for another.
 
-The first deepfake content was a celebrity pornographic movie made by a Reddit user named ``deepfakes'' in 2017 (soon banned from the platform\footnote{Reddit bans 'deepfakes' face-swap porn community: \url{https://www.theguardian.com/technology/2018/feb/08/reddit-bans-deepfakes-face-swap-porn-community}.}). FakeApp, FaceSwap, and other deepfake-based applications started to arise shortly after. 
+The first deepfake content was a celebrity pornographic movie made by a Reddit user named ``deepfakes'' in 2017 (soon banned from the social platform\footnote{Reddit bans 'deepfakes' face-swap porn community: \url{https://www.theguardian.com/technology/2018/feb/08/reddit-bans-deepfakes-face-swap-porn-community}.}). The, \emph{FakeApp}\footnote{FakeApp: \url{https://www.malavida.com/en/soft/fakeapp/}.}, \emph{FaceSwap}\footnote{FaceSwap: \url{https://faceswap.dev}.}, \emph{FaceLab}\footnote{FaceLab: \url{https://www.deepfakevfx.com/downloads/deepfacelab/}.}, and other deepfake-based applications or Web services as \emph{Deepfakesweb}\footnote{Deepfakesweb: \url{https://deepfakesweb.com}.} started to arise shortly after. 
 The term ``deepfakes'' has been applied more generally to any AI-generated videos that impersonate human beings.
 There are now three main categories of deepfake videos, which involve \emph{i)} \emph{head puppetry}, the target person's entire head and upper shoulders are synthesized from a video of the source person's head, giving the synthesized target the appearance of the source; \emph{ii)} \emph{face swapping} is the process of creating a video of the target with the faces of the source's synthesized faces swapped in while maintaining the same facial emotions; \emph{iii)} \emph{lip syncing}, in which the target is made to appear to pronounce words that they do not actually say by just moving the lip region.
 
+The deepfake videos can be used in exciting and inventive ways (e.g., in the movie industry), but because people strongly associate faces with  identities, they can also be turned into personal and social security-threats~\cite{securitythreat}. Well-made deepfakes  can generate the impression that a person is  engaged in actions that do not actually take place in the reality: for instance, some criminal misuse examples are represented by revenge porn, fake news, hoaxes, bullying, and financial fraud~\cite{financialfraud}.
 
-
-However, creating convincing Deepfakes that are both stable and high quality has proven 
+To create convincing deepfakes that are both stable and high quality has proven 
 to be challenging, requiring advanced techniques and algorithms. 
 In this paper, we will explore a novel approach to deepfakes creation using 
 Stable Diffusion, ControlNet, and LoRA: these are three recently proposed techniques that 
@@ -104,11 +100,11 @@ lead to the creation of even more advanced and innovative Deepfake techniques.
 
 \todo[inline]{Più su introduzione e motivare importanza [\textbf{Santini}]}
 
-In Section~\ref{ch:background}, we will understand all the models used in this thesis, understand what a Deepfake is, and look at current state-of-the-art models for generating Deepfakes.
+In Section~\ref{sect:background}, we will understand all the models used in this thesis, understand what a Deepfake is, and look at current state-of-the-art models for generating Deepfakes.
 In Section~\ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate Deepfakes. Section~\ref{sect:related} summarizes the related work, while Section~\ref{ch:conclusion} provides final conclusions and future work.
 
 
-\section{Background}\label{ch:background}
+\section{Background}\label{sect:background}
 
 
 In this section, we will analyze all the major technologies used to develop an application to generate 
