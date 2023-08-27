@@ -84,23 +84,22 @@ The term ``deepfakes'' has been applied more generally to any AI-generated video
 There are now three main categories of deepfake videos, which involve \emph{i)} \emph{head puppetry}, the target person's entire head and upper shoulders are synthesized from a video of the source person's head, giving the synthesized target the appearance of the source; \emph{ii)} \emph{face swapping} is the process of creating a video of the target with the faces of the source's synthesized faces swapped in while maintaining the same facial emotions; \emph{iii)} \emph{lip syncing}, in which the target is made to appear to pronounce words that they do not actually say by just moving the lip region.
 
 The deepfake videos can be used in exciting and inventive ways (e.g., in the movie industry), but because people strongly associate faces with  identities, they can also be turned into personal and social security-threats~\cite{securitythreat}. Well-made deepfakes  can generate the impression that a person is  engaged in actions that do not actually take place in the reality: for instance, some criminal misuse examples are represented by revenge porn, fake news, hoaxes, bullying, and financial fraud~\cite{financialfraud}.
+To create convincing deepfakes that are both stable and high quality has proven  to be challenging, requiring advanced techniques and algorithms~\cite{survey2}. 
 
-To create convincing deepfakes that are both stable and high quality has proven 
-to be challenging, requiring advanced techniques and algorithms. 
-In this paper, we will explore a novel approach to deepfakes creation using 
-Stable Diffusion, ControlNet, and LoRA: these are three recently proposed techniques that 
-have shown promising results in various image synthesis tasks. 
-In this thesis, we will comprehensively analyze all the technology needed to achieve these 
-results and showcase a complete standalone software to generate Deepfakes. 
-Ultimately, this thesis aims to contribute to the ongoing development of 
-Deepfake technology while also promoting a responsible and ethical use of this powerful tool. 
-In addition, we hope that this approach will inspire further research in this area and 
-lead to the creation of even more advanced and innovative Deepfake techniques.
+In this paper, we  explore a novel approach to deepfakes creation using 
+\emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (LoRA): 
+these are three recently proposed techniques that  have shown promising results in various image synthesis tasks, and they will be described in detail in the following sections. 
+Stable Diffusion is a deep learning, text-to-image model released in 2022,  and it is based on diffusion methods. Although it can be used for various tasks including inpainting, outpainting, and creating image-to-image translations directed by text prompts, its primary application is to generate detailed images conditioned on text descriptions. Stable Diffusion is a \emph{Latent Diffusion} model~\cite{rombach2022highresolution}, a kind of deep \emph{Generative Artificial Neural Network}~\cite{GAN}. Its code and model weights were made freely available to the public.
+ControlNet~\cite{zhang2023adding} is a neural network structure to control pre-trained large diffusion models (e.g., Stable Diffusion) to support additional input conditions. Finally, LoRA~\cite{hu2021lora} is a technique to optimize the fine-tuning of large-scale models: freezes the pre-trained model weights while it strongly reduces the number of trainable parameters for downstream tasks.
+
+\todo[inline]{Motivazione di come mai utilizziamo proprio queste tecniche e differenza rispetto a letteratura (fare dopo related work)}
+
+This paper comprehensively analyzes all the technology needed to achieve these  results and showcases a complete standalone software to generate deepfakes.  Ultimately, this thesis aims to contribute to the ongoing development of 
+deepfake technology while also promoting a responsible and ethical use of this powerful tool.  In addition, we hope that this approach will inspire further research in this area and lead to the creation of even more advanced and innovative deepfake techniques.
 
 
-\todo[inline]{Più su introduzione e motivare importanza [\textbf{Santini}]}
 
-In Section~\ref{sect:background}, we will understand all the models used in this thesis, understand what a Deepfake is, and look at current state-of-the-art models for generating Deepfakes.
+In Section~\ref{sect:background}, we will understand all the models used in this thesis, understand what a Deepfake is, and look at current state-of-the-art models for generating deepfakes.
 In Section~\ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate Deepfakes. Section~\ref{sect:related} summarizes the related work, while Section~\ref{ch:conclusion} provides final conclusions and future work.
 
 
@@ -287,7 +286,7 @@ forward process, $\epsilon$ is the pure noise sampled at time step $t$, and
 $\epsilon_\theta(x_t,t)$ is the neural network. The optimization of the neural network is made possible 
 by using a simple \textbf{mean squared error} (MSE) between the true and the predicted Gaussian noise. The training algorithm is then:
 
-\begin{algorithm}
+\begin{algorithm}[t]
     \caption{Training}\label{alg:training}
     \begin{algorithmic}[1]
     \Repeat
@@ -305,7 +304,7 @@ by using a simple \textbf{mean squared error} (MSE) between the true and the pre
 
 \begin{figure}[t]
 	\centering
-    \includegraphics[scale=0.85]{img/svg/UNET.png}
+    \includegraphics[scale=0.87]{img/svg/UNET.png}
 	\caption{U-net architecture.}\label{fig:unet}
 \end{figure}
 
@@ -320,7 +319,7 @@ The network also uses \emph{global attention} in the lower dimensional layers to
 \paragraph{Sampling}
 The sampling process is done by reversing the diffusion process. The algorithm is defined as follows:
 
-\begin{algorithm}
+\begin{algorithm}[b]
     \caption{Sampling}\label{alg:sampling}
     \begin{algorithmic}[1]
     \State $\mathbf{x}_T \sim \mathcal{N}(\mathbf{0},\mathbf{I})$
@@ -464,7 +463,7 @@ where $c_t$ are the text prompts and $c_f$ are task-specific conditions. Here ar
 	\item Hough line.
 	\item HED boundary.
 	\item User Sketching.
-	\item Human pose (Openpose\footnote{Openpose github: \url{https://github.com/CMU-Perceptual-Computing-Lab/openpose}}).
+	\item Human pose (Openpose\footnote{Openpose github: \url{https://github.com/CMU-Perceptual-Computing-Lab/openpose}.}).
 	\item Semantic segmentation.
 	\item Depth.
 	\item Normal Maps.
@@ -516,7 +515,7 @@ $\Delta W = BA$ is zero.
 
 \subsection{MediaPipe}
 
-\emph{MediaPipe}\footnote{MediaPipe web page: \url{https://mediapipe.dev/}} 
+\emph{MediaPipe}\footnote{MediaPipe web page: \url{https://mediapipe.dev/}.} 
 is an open-source framework for building pipelines to perform computer vision 
 inference over arbitrary sensory data such as video or audio.
 MediaPipe offers the following solutions:
@@ -664,7 +663,7 @@ In Section ~\ref{sec:face_detection}, we will focus on automating the cropping o
 
 The first step of the \textbf{preprocessing pipeline} is decreasing the frame rate to \textbf{12 FPS}. 
 This processing saves time later during the diffusion phase, having fewer frames to work on. 
-Twelve frames per second is the frame rate used in all major animation studios to ensure the minimum number of  frames while maintaining fluidity in a video. A python library called \emph{OpenCV}\footnote{OpenCV website: \url{https://opencv.org/}} 
+Twelve frames per second is the frame rate used in all major animation studios to ensure the minimum number of  frames while maintaining fluidity in a video. A python library called \emph{OpenCV}\footnote{OpenCV website: \url{https://opencv.org/}.} 
 was used to achieve this goal.  First, a function called ``\textbf{get-saving-frames-durations}'' returns the list of durations where to save the frames; this is done by creating a list of evenly spaced time points from $t=0$ to the end of the video, with a step of $1/12$. 
 
 After this, the primary function extracts the earliest saving time from the list of durations; 
@@ -753,17 +752,18 @@ resulting in a mask with smooth borders that can be seen in Figure~\ref{fig:mask
 
 \subsection{Stable Diffusion WebUI} \label{sec:stable_diffusion_webui}
 
-A browser interface based on \emph{Gradio library}\footnote{Gradio website: \url{https://gradio.app/}} 
-created by AUTOMATIC1111\footnote{Stable Diffusion WebUI Github: \url{https://github.com/AUTOMATIC1111/stable-diffusion-webui}} 
+A browser interface based on \emph{Gradio library}\footnote{Gradio website: \url{https://gradio.app/}.} 
+created by AUTOMATIC1111\footnote{Stable Diffusion WebUI Github: \url{https://github.com/AUTOMATIC1111/stable-diffusion-webui}.} 
 was used to operate Stable Diffusion. 
 This interface offers all Stable Diffusion modules optimized for \textbf{lower VRAM usage}, down to 2GB. 
-The software creates a \textbf{local server on port 7860} and,  using the \emph{Xformers library}\footnote{Xformers Github: \url{https://github.com/facebookresearch/xformers}} further speeds up the image generation process on \textbf{Nvidia GPUs}.
+The software creates a \textbf{local server on port $7860$} and,  using the \emph{Xformers library}\footnote{Xformers Github: \url{https://github.com/facebookresearch/xformers}.} further speeds up the image generation process on \textbf{Nvidia GPUs}.
 
 The most exciting part is that this software offers an extension module to  implement ControlNet and LoRA models with just a click.  To call a LoRA model for diffusion, we need to write in the prompt ``\textbf{<lora:ModelName:$\alpha$>}'',  where ModelName is the name of the model file without the extension,  and $\alpha$ is the weight applied to the LoRA model that goes from $0$ to $1$ (with $0$ the model is disabled). 
 
 Given that the application developed for this project is standalone,  we need a way to communicate with the web UI. We can use the \emph{API} the local server offers for this.
 We can communicate with the Stable Diffusion web UI through simple 
 POST and GET requests through an \textbf{HTTP communication}. 
+
 \begin{python}
 	payload = {
 		"init_images": [
@@ -786,6 +786,7 @@ POST and GET requests through an \textbf{HTTP communication}.
 		]
 	}
 \end{python}
+
 The \textbf{JSON payload} used for diffusion is composed of several elements.
 First, we have an array of images to diffuse (in our case, just one image), 
 where each image is encoded to \textbf{Base64}. 
@@ -969,7 +970,7 @@ Ultimately, all the final frames get united into a single \textbf{12 FPS AVI fil
 
 \subsection{GUI}\label{sec:gui}
 
-The GUI was developed with \emph{PyQt6}\footnote{PyQt6: \url{https://pypi.org/project/PyQt6/}}, 
+The GUI was developed with \emph{PyQt6}\footnote{PyQt6: \url{https://pypi.org/project/PyQt6/}.}, 
 a Python library for creating GUI applications using the \emph{Qt toolkit}.  The application comprises a \textbf{600 x 900 pixels main window} where a \textbf{tab menu} gives users access to each page.
 All the pages utilize \emph{QtWidgets} to create the graphical components,  while a \textbf{thread worker} does all the heavy calculations and communicates  with the components through \textbf{signals}. 
 This structure allows the user to interrupt every process while it is running.
@@ -1070,7 +1071,7 @@ These problems can be resolved in the future by implementing a better \emph{mask
 
 
 \section{Related Work}\label{sect:related}
-The high interest in deepfake generation and detection can also be appreciated in the high number of references in the scientific literature. For example, recent surveys are \cite{survey1}.
+The high interest in deepfake generation and detection can also be appreciated in the high number of references in the scientific literature. For example, recent surveys are \cite{survey1,survey2}.
 
 As previously introduced, the interest of scientists has focused mainly on generation and detection. Considering detection, in \cite{detection1} the authors,
 
