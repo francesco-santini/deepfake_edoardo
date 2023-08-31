@@ -83,31 +83,33 @@ The deepfake videos can be used in exciting and inventive ways (e.g., in the mov
 To create convincing deepfakes that are both stable and high quality has proven  to be challenging, requiring advanced techniques and algorithms~\cite{survey2}. 
 
 The first deepfake content was a celebrity pornographic movie made by a Reddit user named ``deepfakes'' in 2017 (soon banned from the social platform\footnote{Reddit bans ``deepfakes'' face-swap porn community: \url{https://www.theguardian.com/technology/2018/feb/08/reddit-bans-deepfakes-face-swap-porn-community}.}). The, \emph{FakeApp}\footnote{FakeApp: \url{https://www.malavida.com/en/soft/fakeapp/}.}, \emph{FaceSwap}\footnote{FaceSwap: \url{https://faceswap.dev}.}, \emph{FaceLab}\footnote{FaceLab: \url{https://www.deepfakevfx.com/downloads/deepfacelab/}.}, and other deepfake-based applications or Web services as \emph{Deepfakesweb}\footnote{Deepfakesweb: \url{https://deepfakesweb.com}.} started to arise shortly after. 
-The term ``deepfakes'' has been applied more generally to any AI-generated videos that impersonate human beings.
+The term ``deepfake'' has been applied more generally to any AI-generated videos that impersonate human beings.
 A general classification consider  four kinds of deepfake according to media types\cite{surveydet}, as ``video with audio'', ``video without audio'', ``audio'', and ``image''; in this work we consider ``video without audio'', as we focus on the generation of the video only.
 
 There are three main categories of deepfake videos~\cite{lyu}, which involve \emph{i)} \emph{head puppetry}, the target person's entire head and upper shoulders are synthesized from a video of the source person's head, giving the synthesized target the appearance of the source; \emph{ii)} \emph{face swapping} is the process of creating a video of the target with the faces of the source's synthesized faces swapped in while maintaining the same facial emotions; \emph{iii)} \emph{lip syncing}, in which the target is made to appear to pronounce words that they do not actually say by just moving the lip region. In this work, we focus on face swapping.
 
 
-We  explore a novel approach to deepfakes creation using  \emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (LoRA):  these are three recently proposed techniques that  have shown promising results in various image synthesis tasks, and they will be described in detail in the following sections. Stable Diffusion is a deep learning, text-to-image model released in 2022,  and it is based on diffusion methods. Although it can be used for various tasks including in-painting, out-painting, and creating image-to-image translations directed by text prompts, its primary application is to generate detailed images conditioned on text descriptions. Stable Diffusion is a \emph{Latent Diffusion} model~\cite{rombach2022highresolution}, a kind of deep \emph{Generative Artificial Neural Network} (\emph{GAN})~\cite{GAN}. Its code and model weights were made freely available to the public.
+We  explore a novel approach to deepfake generation by using  \emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (LoRA):  these are three recently proposed techniques that  have shown promising results in various image synthesis tasks, and they will be described in detail in the following sections. Stable Diffusion is a deep learning, text-to-image model released in 2022,  and it is based on diffusion methods. Although it can be used for various tasks including in-painting, out-painting, and creating image-to-image translations directed by text prompts, its primary application is to generate detailed images conditioned on text descriptions. Stable Diffusion is a \emph{Latent Diffusion} model~\cite{rombach2022highresolution}, a kind of deep \emph{Generative Artificial Neural Network} (\emph{GAN})~\cite{GAN}. Its code and model weights were made freely available to the public.
 ControlNet~\cite{zhang2023adding} is a neural network structure to control pre-trained large diffusion models (e.g., Stable Diffusion) to support additional input conditions. Finally, LoRA~\cite{hu2021lora} is a technique to optimize the fine-tuning of large-scale models: freezes the pre-trained model weights while it strongly reduces the number of trainable parameters for downstream tasks.
 
-Therefore, we propose a different approach to generate deepfakes with respect to the literature, which is mostly based on GANs (see Section~\ref{sect:related}). In our case, at the core of the proposal we have Stable Diffusion instead. Sable Diffusion and GANs are distinct approaches to generative modeling: the former gradually transforms a simple initial distribution (often noise) into a complex target distribution (the desired one), while in GANs two neural networks, i.e., a generator and a discriminator are trained in a competitive manner  to learn to generate high-quality samples. Using Stable Diffusion allows for a quick 
+Therefore, we propose a different approach to generate deepfakes with respect to the literature, which is mostly based on GANs~\cite{surveydgen1} (see Section~\ref{sect:related}). In our case, at the core of the proposal we have Stable Diffusion instead: Stable Diffusion and GANs are distinct approaches to generative modeling: the former gradually transforms a simple initial distribution (often noise) into a complex target distribution (the desired one), while in GANs two neural networks, i.e., a generator and a discriminator, are trained in a competitive manner  to learn to generate samples. 
 
-This paper comprehensively analyzes all the technology needed to achieve these  results and showcases a complete standalone software to generate deepfakes.  Ultimately, this thesis aims to contribute to the ongoing development of 
-deepfake technology while also promoting a responsible and ethical use of this powerful tool.  In addition, we hope that this approach will inspire further research in this area and lead to the creation of even more advanced and innovative deepfake techniques.
+Using Stable Diffusion allows for a fast prototyping of the deepfake because of several reasons: first, there is the possibility for a user to use a textual description to describe the deepfake to be generated, making it possible to quickly modify it. Moreover, due to its characteristics, it is also possible to easily change the style of the image (e.g., summer to winter, or from realistic to cartoonish), or to add different details to the deepfake (e.g., some objects in the background). Indeed, Stable Diffusion models tend to be in general more computationally demanding than GANs due to their iterative nature, especially when dealing with larger and more complex datasets. However, the training process is in general more stable than GANs (which may suffer from the \emph{mode collapse} problem), and  it is more fine-grained. Moreover, some first results show that it is possible to achieve higher-quality synthetic images~\cite{dmbetter}.
+
+This paper comprehensively analyzes all the technology needed to achieve such results and showcases a complete standalone software to generate deepfakes with this novel approach.  This papers aims to contribute to the ongoing development of 
+deepfake technology while also promoting a responsible and ethical use of this powerful tool.  In addition, we hope that this approach will inspire further research in this area and lead to the creation of even more advanced and innovative deepfake techniques, as for example mixing GANs and Stable diffusion together~\cite{mix} (se also the conclusions of this paper in Section~\ref{sect:conclusion}).
 
 
 
-In Section~\ref{sect:background}, we will understand all the models used in this thesis, understand what a deepfake is, and look at current state-of-the-art models for generating deepfakes.
-In Section~\ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate deepfakes. Section~\ref{sect:related} summarizes the related work, while Section~\ref{ch:conclusion} provides final conclusions and future work.
+In Section~\ref{sect:background}, we will survey the most important generative models, as for example GANs and Stable Diffusion.
+In Section~\ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate deepfakes. Section~\ref{sect:related} summarizes the related work, while Section~\ref{sect:conclusion} provides final conclusions and future work.
 
 
 \section{Background}\label{sect:background}
 
 
 In this section, we will analyze all the major technologies used to develop an application to generate 
-deepfakes through one of the newest generative models called Stable diffusion. 
+deepfakes through one of the newest generative models called Stable Diffusion. 
 We will start by understanding what a diffusion model is and how Stable Diffusion can condition the 
 generation of an image through a textual or graphical input. 
 We will then explore how ControlNet and LoRA can help us improve Stable Diffusion performances and unlock new fine-tuning possibilities. 
@@ -116,13 +118,13 @@ Ultimately, we will look at current state-of-the-art models for deepfakes.
 
 
 
-\subsection{Generative Models} \label{sec:imggenmodels}
+\subsection{Generative Models}\label{sec:imggenmodels}
 \textbf{Generative models} are a class of statistical models that contrast discriminative ones. 
 It is possible to affirm that generative models can generate \textbf{new data instances}, 
 in our case, images. 
 More formally, given a set of data instances $X$ and a set of labels $Y$, 
 generative models capture the joint probability $p(X, Y)$, or just $p(X)$ if there are no labels. 
-In the following sections, we will analyze the most common generative models.
+In the following sections, we will analyze the most common generative models in the literature.
 
 
 \subsubsection{Generative Adversarial Networks (GAN)}\label{sec:gan}
@@ -130,14 +132,13 @@ In the following sections, we will analyze the most common generative models.
 \begin{figure}[b]
 	\centering
     \includegraphics[scale=0.8]{img/svg/GAN.png}
-	\caption{Overview of GAN.}\label{fig:gan}
+	\caption{Overview of a GAN.}\label{fig:gan}
 \end{figure}
 
 \emph{Generative Adversarial Networks} (GAN) \cite{goodfellow2014generative} are generative models based on a game between two neural networks. 
 The first network, called the \textbf{generator}, given a noise or a conditioning variable (class label, text encoding), generates new data instances. 
 The second network called the \textbf{discriminator}, evaluates the result of the first network against authentic images.
-The generator and the discriminator are trained simultaneously in an adversarial manner, hence the name GAN. An example of architecture is shown in Figure~\ref{fig:gan}, where $X$ represents the authentic data, $X'$ represents the generated data, $D(X)$ signifies the probability that the input $X$ is real, and $G(Z)$ denotes the generated data given a noise variable input $Z$.
-\cite{weng2019gan}.
+The generator and the discriminator are trained simultaneously in an adversarial manner, hence the name GAN. An example of architecture is shown in Figure~\ref{fig:gan}, where $X$ represents the authentic data, $X'$ represents the generated data, $D(X)$ signifies the probability that the input $X$ is real, and $G(Z)$ denotes the generated data given a noise variable input $Z$~\cite{weng2019gan}.
 
 \subsubsection{Variational Autoencoders (VAE)} \label{sec:vae}
 
@@ -191,19 +192,19 @@ In the case of images, a diffusion model is composed of two processes:
 \end{itemize}
 
 
-
+\subsubsection{Forward Diffusion Process}
 
 Let $q(x_0)$ be the real data distribution; then, we can sample from this distribution to get an image, $x_0 \sim q(x_0)$. 
 We define the forward distribution process $q(x_t|x_{t-1})$ which adds Gaussian noise at each time step $t$, 
 according to a known \textbf{variance schedule} $0<\beta_1<\beta_2<...<\beta_T<1$, where $\beta_t$ 
-is not constant (linear, quadratic, cosine) at each time step $t$, 
-as
+is not constant (linear, quadratic, cosine) at each time step $t$,  as
+
 \begin{equation} \label{eq:forward}
 	q(x_t|x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta}x_{t-1}, \beta_t I)
 \end{equation}
 Given $\alpha_t:=1-\beta$ and the cumulative product of all $\alpha_t$ up to time step $t$ as 
-$\bar{\alpha_t} := \prod_{s=1}^t\alpha_s$, then, we can rewrite Equation ~\ref{eq:forward} as 
-\cite{weng2021diffusion}:
+$\bar{\alpha_t} := \prod_{s=1}^t\alpha_s$, then, we can rewrite Equation~\ref{eq:forward} as \cite{weng2021diffusion}:
+
 \begin{equation}
 	\begin{split}
 		x_t & = \sqrt{1-\beta_t}x_{t-1} + \sqrt{\beta_t}\epsilon_{t-1}
@@ -215,7 +216,9 @@ $\bar{\alpha_t} := \prod_{s=1}^t\alpha_s$, then, we can rewrite Equation ~\ref{e
 		& = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon 
 	\end{split}
 \end{equation}
+
 And in the original form as
+
 \begin{equation} \label{eq:forward2}
 	q(x_t|x_{t-1}) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t}x_0, (1 -\bar{\alpha}_t) I)
 \end{equation}
@@ -223,7 +226,7 @@ This makes it possible to sample $x_t$ at any arbitrary noise level conditioned 
 meaning that we don't need to apply $q$ repeatedly to sample $x_t$.
 
 
-\subsubsection{Forward Diffusion Process}
+\subsubsection{Reverse Diffusion Process}
 \begin{figure}[b]
 	\centering
 	\includegraphics[scale=0.74, keepaspectratio]{img/background_img/Diffusion2.png}
@@ -231,7 +234,6 @@ meaning that we don't need to apply $q$ repeatedly to sample $x_t$.
 \end{figure}
 
 
-\paragraph{Reverse Diffusion Process}\mbox{}\\
 By knowing the \textbf{conditional distribution} $p(x_{t-1}|x_t)$, we could run the process in reverse by sampling some random Gaussian noise $x_T$ and then gradually denoise it so that we end up with a sample from the actual distribution $x_0$.
 An illustrative example of this concept can be observed in Figure~\ref{fig:m-chain}. In this figure, an image of pure isotropic Gaussian noise, denoted as $x_T$, undergoes a gradual denoising process until it reaches the original image, denoted as $x_0$.
 Nonetheless, the conditional distribution $p(x_{t-1}|x_t)$ is \textbf{intractable} since it requires knowing the distribution of all possible images to be calculated.
@@ -702,14 +704,14 @@ This was done with \emph{Graham's scan algorithm} \cite{GRAHAM1972132} that work
 \begin{enumerate}
 	\item Find the point with the lowest $y$ coordinate, breaking ties by choosing the point with the lowest $x$ coordinate. 
 	Let this point be $P_0$. Put $P_0$ at the first position in the output hull.
-	\item Consider the remaining $n-1$ points and sort them by the polar angle in counterclockwise order around $P_0$.
+	\item Consider the remaining $n-1$ points and sort them by the polar angle in counter-clockwise order around $P_0$.
 	\item Check if two or more points have the same polar angle. If so, remove all except the one that is farthest from $P_0$. 
 	Let the size of the remaining set of points be $m$.
 	\item If $m \leq 2$, the algorithm terminates; the convex hull is not possible.
 	\item Create an empty stack $S$ and push $P_0$, $P_1$, and $P_2$ to it.
 	\item Process the remaining $m-3$ points one at a time, starting from $P_3$. by doing:
 	\begin{enumerate}
-		\item Keep removing points from $S$ while the orientation of the topmost point, next-to-top point, and current point is not counterclockwise.
+		\item Keep removing points from $S$ while the orientation of the topmost point, next-to-top point, and current point is not counter-clockwise.
 		\item Push the current point to $S$.
 	\end{enumerate}
 	\item The points in $S$ are the output convex hull.
@@ -1068,7 +1070,7 @@ As previously introduced, the interest of scientists has focused mainly on gener
 
 
 
-\section{Conclusion}\label{ch:conclusion}
+\section{Conclusion}\label{sect:conclusion}
 In conclusion, this thesis has proposed a novel approach to deepfake creation using Stable Diffusion, ControlNet, and LoRA. By combining these three techniques, we have shown that creating highly realistic and almost stable deepfakes with complete control over their features and quality is possible. 
 
 Furthermore, we have demonstrated how to fine-tune a Stable Diffusion model through LoRA,  allowing us to generate new faces not present in the original datasets. How ControlNet can help us achieve more frame-to-frame consistency during the diffusion process, and finally, how all these models can be implemented in a single standalone application to generate deepfakes. Since MediaPipe supports multi-face detection, future versions of this software could expand the possibilities to a multi-face deepfake solution. Given that this solution could be slow with the current pipeline, a possibility is to distribute the diffusion process on multiple machines. This strategy could also give the possibility to do all the calculations on remote servers allowing the software to become a lightweight client app on a mobile phone. The mobile application could also help the deepfake technology to become easier to employ for a larger number of users due to the low need for processing power. In future software versions, there will be the possibility to manage ControlNet parameters and change the current ControlNet model, making the diffusion process easier to adjust to the user's needs.
