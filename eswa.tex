@@ -79,40 +79,40 @@ Deepkafe, Stable Diffusion, ControlNet, Low-Rank Adaptation.
 Deepfakes have become a popular subject of discussion in recent years. 
 Despite the fact that digital picture and video creation and modification are not new (e.g., \cite{farid}), advances in machine learning and artificial intelligence have made it possible to create highly realistic digital media that can deceive even the most discerning eye. Simply speaking, deepfakes are synthetic media that have undergone digital manipulation to convincingly swap out one person's likeness for another.
 
-The first deepfake content was a celebrity pornographic movie made by a Reddit user named ``deepfakes'' in 2017 (soon banned from the social platform\footnote{Reddit bans 'deepfakes' face-swap porn community: \url{https://www.theguardian.com/technology/2018/feb/08/reddit-bans-deepfakes-face-swap-porn-community}.}). The, \emph{FakeApp}\footnote{FakeApp: \url{https://www.malavida.com/en/soft/fakeapp/}.}, \emph{FaceSwap}\footnote{FaceSwap: \url{https://faceswap.dev}.}, \emph{FaceLab}\footnote{FaceLab: \url{https://www.deepfakevfx.com/downloads/deepfacelab/}.}, and other deepfake-based applications or Web services as \emph{Deepfakesweb}\footnote{Deepfakesweb: \url{https://deepfakesweb.com}.} started to arise shortly after. 
-The term ``deepfakes'' has been applied more generally to any AI-generated videos that impersonate human beings.
-There are now three main categories of deepfake videos, which involve \emph{i)} \emph{head puppetry}, the target person's entire head and upper shoulders are synthesized from a video of the source person's head, giving the synthesized target the appearance of the source; \emph{ii)} \emph{face swapping} is the process of creating a video of the target with the faces of the source's synthesized faces swapped in while maintaining the same facial emotions; \emph{iii)} \emph{lip syncing}, in which the target is made to appear to pronounce words that they do not actually say by just moving the lip region.
-
 The deepfake videos can be used in exciting and inventive ways (e.g., in the movie industry), but because people strongly associate faces with  identities, they can also be turned into personal and social security-threats~\cite{securitythreat}. Well-made deepfakes  can generate the impression that a person is  engaged in actions that do not actually take place in the reality: for instance, some criminal misuse examples are represented by revenge porn, fake news, hoaxes, bullying, and financial fraud~\cite{financialfraud}.
 To create convincing deepfakes that are both stable and high quality has proven  to be challenging, requiring advanced techniques and algorithms~\cite{survey2}. 
 
-In this paper, we  explore a novel approach to deepfakes creation using 
-\emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (LoRA): 
-these are three recently proposed techniques that  have shown promising results in various image synthesis tasks, and they will be described in detail in the following sections. 
-Stable Diffusion is a deep learning, text-to-image model released in 2022,  and it is based on diffusion methods. Although it can be used for various tasks including inpainting, outpainting, and creating image-to-image translations directed by text prompts, its primary application is to generate detailed images conditioned on text descriptions. Stable Diffusion is a \emph{Latent Diffusion} model~\cite{rombach2022highresolution}, a kind of deep \emph{Generative Artificial Neural Network}~\cite{GAN}. Its code and model weights were made freely available to the public.
+The first deepfake content was a celebrity pornographic movie made by a Reddit user named ``deepfakes'' in 2017 (soon banned from the social platform\footnote{Reddit bans ``deepfakes'' face-swap porn community: \url{https://www.theguardian.com/technology/2018/feb/08/reddit-bans-deepfakes-face-swap-porn-community}.}). The, \emph{FakeApp}\footnote{FakeApp: \url{https://www.malavida.com/en/soft/fakeapp/}.}, \emph{FaceSwap}\footnote{FaceSwap: \url{https://faceswap.dev}.}, \emph{FaceLab}\footnote{FaceLab: \url{https://www.deepfakevfx.com/downloads/deepfacelab/}.}, and other deepfake-based applications or Web services as \emph{Deepfakesweb}\footnote{Deepfakesweb: \url{https://deepfakesweb.com}.} started to arise shortly after. 
+The term ``deepfakes'' has been applied more generally to any AI-generated videos that impersonate human beings.
+A general classification consider  four kinds of deepfake according to media types\cite{surveydet}, as ``video with audio'', ``video without audio'', ``audio'', and ``image''; in this work we consider ``video without audio'', as we focus on the generation of the video only.
+
+There are three main categories of deepfake videos~\cite{lyu}, which involve \emph{i)} \emph{head puppetry}, the target person's entire head and upper shoulders are synthesized from a video of the source person's head, giving the synthesized target the appearance of the source; \emph{ii)} \emph{face swapping} is the process of creating a video of the target with the faces of the source's synthesized faces swapped in while maintaining the same facial emotions; \emph{iii)} \emph{lip syncing}, in which the target is made to appear to pronounce words that they do not actually say by just moving the lip region. In this work, we focus on face swapping.
+
+
+We  explore a novel approach to deepfakes creation using  \emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (LoRA):  these are three recently proposed techniques that  have shown promising results in various image synthesis tasks, and they will be described in detail in the following sections. Stable Diffusion is a deep learning, text-to-image model released in 2022,  and it is based on diffusion methods. Although it can be used for various tasks including in-painting, out-painting, and creating image-to-image translations directed by text prompts, its primary application is to generate detailed images conditioned on text descriptions. Stable Diffusion is a \emph{Latent Diffusion} model~\cite{rombach2022highresolution}, a kind of deep \emph{Generative Artificial Neural Network} (\emph{GAN})~\cite{GAN}. Its code and model weights were made freely available to the public.
 ControlNet~\cite{zhang2023adding} is a neural network structure to control pre-trained large diffusion models (e.g., Stable Diffusion) to support additional input conditions. Finally, LoRA~\cite{hu2021lora} is a technique to optimize the fine-tuning of large-scale models: freezes the pre-trained model weights while it strongly reduces the number of trainable parameters for downstream tasks.
 
-\todo[inline]{Motivazione di come mai utilizziamo proprio queste tecniche e differenza rispetto a letteratura (fare dopo related work)}
+Therefore, we propose a different approach to generate deepfakes with respect to the literature, which is mostly based on GANs (see Section~\ref{sect:related}). In our case, at the core of the proposal we have Stable Diffusion instead. Sable Diffusion and GANs are distinct approaches to generative modeling: the former gradually transforms a simple initial distribution (often noise) into a complex target distribution (the desired one), while in GANs two neural networks, i.e., a generator and a discriminator are trained in a competitive manner  to learn to generate high-quality samples. Using Stable Diffusion allows for a quick 
 
 This paper comprehensively analyzes all the technology needed to achieve these  results and showcases a complete standalone software to generate deepfakes.  Ultimately, this thesis aims to contribute to the ongoing development of 
 deepfake technology while also promoting a responsible and ethical use of this powerful tool.  In addition, we hope that this approach will inspire further research in this area and lead to the creation of even more advanced and innovative deepfake techniques.
 
 
 
-In Section~\ref{sect:background}, we will understand all the models used in this thesis, understand what a Deepfake is, and look at current state-of-the-art models for generating deepfakes.
-In Section~\ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate Deepfakes. Section~\ref{sect:related} summarizes the related work, while Section~\ref{ch:conclusion} provides final conclusions and future work.
+In Section~\ref{sect:background}, we will understand all the models used in this thesis, understand what a deepfake is, and look at current state-of-the-art models for generating deepfakes.
+In Section~\ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate deepfakes. Section~\ref{sect:related} summarizes the related work, while Section~\ref{ch:conclusion} provides final conclusions and future work.
 
 
 \section{Background}\label{sect:background}
 
 
 In this section, we will analyze all the major technologies used to develop an application to generate 
-Deepfakes through one of the newest generative models called Stable diffusion. 
+deepfakes through one of the newest generative models called Stable diffusion. 
 We will start by understanding what a diffusion model is and how Stable Diffusion can condition the 
 generation of an image through a textual or graphical input. 
 We will then explore how ControlNet and LoRA can help us improve Stable Diffusion performances and unlock new fine-tuning possibilities. 
 Moreover, we will understand how MediaPipe can aid us in detecting faces' location and their structures. 
-Ultimately, we will look at current state-of-the-art models for Deepfakes.
+Ultimately, we will look at current state-of-the-art models for deepfakes.
 
 
 
@@ -567,22 +567,11 @@ The second is a \emph{3D face landmark model} \cite{kartynnik2019realtime} that 
 approximate 3D surface via regression. In Figure~\ref{fig:MediapipeDemo}, we can observe a representation of the output.
 
 
-\subsection{Deepfakes}
-Deepfakes are an artificial intelligence technique that combines machine learning with computer graphics to create \textbf{fake videos or images that appear real}. 
-The term ``Deepfake'' was first coined in late 2017 by a Reddit user of the same name. 
-This user created a space on the online news and aggregation site where they shared pornographic videos that used open-source face-swapping technology.
-Deepfakes use various generative models to analyze and learn from a large dataset of real images and videos and generate new ones remarkably similar to the original data.
-This technology has been used to create realistic-looking videos of people doing things they never actually did or saying things they never actually said. 
-For example, Deepfake videos have been created that show political leaders saying things they never actually said or celebrities in compromising or embarrassing situations.
-
-While Deepfakes have some harmless uses, such as creating digital avatars for gaming and entertainment, they also pose a significant risk to society. 
-Deepfakes can be used to spread disinformation and fake news, damage reputations, and even manipulate elections.
-
 
 
 \subsubsection{Deepfakes with Autoencoders (AE) and Variational Autoencoders (VAE)}\label{sec:deep-vae}
 
-We already introduced \emph{Autoencoders} \cite{bank2021autoencoders} in Section \ref{sec:vae}, but here we will go into further detail  about how they can be used to create Deepfakes. Their training is based on learning the functions $A : \mathbb{R}^n \rightarrow \mathbb{R}^p$ (encoder), 
+We already introduced \emph{Autoencoders} \cite{bank2021autoencoders} in Section \ref{sec:vae}, but here we will go into further detail  about how they can be used to create deepfakes. Their training is based on learning the functions $A : \mathbb{R}^n \rightarrow \mathbb{R}^p$ (encoder), 
 and $B:\mathbb{R}^p \rightarrow \mathbb{R}^n$ (decoder), where both satisfy:
 
 \begin{equation}
@@ -598,16 +587,16 @@ where $E$ is the expectation over the distribution of $x$ and $\Delta$ is the re
     \includegraphics[scale=0.6, keepaspectratio]{img/background_img/Training-AE.png}
     \caption{Decoder training.}\label{fig:training-ae}
 	\includegraphics[scale=0.6, keepaspectratio]{img/background_img/Generation-AE2.png}
-	\caption{Generation of Deepfakes.}\label{fig:generation-ae}
+	\caption{Generation of deepfakes.}\label{fig:generation-ae}
 \end{figure}
 
 
 This architecture commonly uses \textbf{multiple hidden layers} between the encoder and the decoder 
 with fewer neurons than the number of input image pixels, creating a latent image representation. 
-The generation of Deepfakes with AE consists of three significant steps.
+The generation of deepfakes with AE consists of three significant steps.
 First, an encoder is trained to produce feature maps for \textbf{both faces class}, while a decoder is trained as a \textbf{measure of encoder accuracy}. 
 
-Then, as shown in Figure~\ref{fig:training-ae}, \textbf{two decoders are trained} separately to reproduce images from both classes. Finally, \textbf{decoders are switched} to produce images from one class based on feature maps from the other, illustrated in Figure~\ref{fig:generation-ae}. This same method can be applied to generate Deepfakes with VAE (Section \ref{sec:vae}), the only difference being \textbf{how the latent vector is obtained}.
+Then, as shown in Figure~\ref{fig:training-ae}, \textbf{two decoders are trained} separately to reproduce images from both classes. Finally, \textbf{decoders are switched} to produce images from one class based on feature maps from the other, illustrated in Figure~\ref{fig:generation-ae}. This same method can be applied to generate deepfakes with VAE (Section \ref{sec:vae}), the only difference being \textbf{how the latent vector is obtained}.
 
 
 
@@ -622,14 +611,14 @@ Then, as shown in Figure~\ref{fig:training-ae}, \textbf{two decoders are trained
 
 \emph{VAE/GAN} \cite{larsen2016autoencoding} is a combination of \emph{Variational Autoencoders} and \emph{Generative Adversarial Networks} that leverages learned representations to better measure similarities in data space. Figure~\ref{fig:vae-gan} shows how it is possible to combine a VAE with a GAN by \textbf{collapsing} the VAE decoder and the GAN generator  into one and then letting them share parameters and training them jointly.
 This unsupervised generative model simultaneously learns to encode, generate, and compare dataset samples. 
-The method used to generate Deepfakes is similar to the one explained in Section \ref{sec:deep-vae} while achieving  better results by leveraging the GAN discriminator.
+The method used to generate deepfakes is similar to the one explained in Section \ref{sec:deep-vae} while achieving  better results by leveraging the GAN discriminator.
 
 
 
 \section{Our Approach} \label{ch:project}
 
-In this section, we will see how all the technologies presented in the previous  section can be used to create an application to generate Deepfakes through Stable Diffusion.  Starting from how the input video needs to be processed.  We will then understand how we can use LoRA and Stable Diffusion with ControlNet to  generate images of a target subject and how these images can be applied to the input video, 
-creating a real Deepfake.  Finally, we will understand the problems of this process and how they can be improved.
+In this section, we will see how all the technologies presented in the previous  section can be used to create an application to generate deepfakes through Stable Diffusion.  Starting from how the input video needs to be processed.  We will then understand how we can use LoRA and Stable Diffusion with ControlNet to  generate images of a target subject and how these images can be applied to the input video, 
+creating a real deepfake.  Finally, we will understand the problems of this process and how they can be improved.
 
 
 
@@ -644,7 +633,7 @@ creating a real Deepfake.  Finally, we will understand the problems of this proc
 
 
 
-In Figure~\ref{fig:project}, we can see the entire \textbf{pipeline} used to create Deepfakes from a video source. 
+In Figure~\ref{fig:project}, we can see the entire \textbf{pipeline} used to create deepfakes from a video source. 
 First, the input video is decreased to $12$ frames per second. Then for every frame, by using \emph{MediaPipe}, we can extrapolate face locations and their structure.  Next, the structure created with \emph{Face Mesh} is processed to create a mask for the latter application of the diffused image, 
 while the locations detected by \emph{Face Detection} are used to extract just the face. After this, every cropped image is processed through \emph{Stable Diffusion} with \emph{ControlNet} and \emph{LoRA}. 
 
@@ -827,6 +816,7 @@ Then we need to eliminate all the blurred images from the dataset.
 To perform \emph{blur detection}, we can use the \emph{variance of the Laplacian} \cite{903548}. 
 This simple method can be implemented with just a single line of code with the help of OpenCV. 
 First, we convolve a single channel of the input image with the \emph{Laplacian kernel}:
+
 \begin{equation}
 	\begin{bmatrix}
 		0 & 1 & 0\\
@@ -834,8 +824,9 @@ First, we convolve a single channel of the input image with the \emph{Laplacian 
 		0 & 1 & 0
 	\end{bmatrix}
 \end{equation}
+
 Furthermore, we take the response's variance (i.e., standard deviation squared) 
-and compare it to a \textbf{pre-defined threshold}; if it falls below, the image is blurry; otherwise, it is not.
+and compare it to a \textbf{predefined threshold}; if it falls below, the image is blurry; otherwise, it is not.
 The Laplacian operator is generally used to measure the second derivative of an image, 
 highlighting regions containing rapid intensity changes. 
 We can affirm that if the image contains a high variance, there is a wide spread of responses, 
@@ -884,7 +875,7 @@ The handle is part of a pipe clamp glued on top to make the light easier to hold
 The light is generated by an array of 100 RGB LEDs (WS2812B) that need a 5V, 50W external power supply. 
 The circuit is shown in Figure~\ref{fig:light-circuit} and helps us to understand how the light works. 
 
-First, an \emph{Arduino Nano} controls all the logic and has its power supply.  Next, the board is connected via a digital pin to the LED strip and is protected  from \textbf{signals reflections} by a $330\Omega$ resistor. A $500 \mu F$ capacitor is used on the LED powerline to help provide current 
+First, an \emph{Arduino Nano}\footnote{Arduino Nano documentation: \url{https://docs.arduino.cc/hardware/nano}.} controls all the logic and has its power supply.  Next, the board is connected via a digital pin to the LED strip and is protected  from \textbf{signals reflections} by a $330\Omega$ resistor. A $500 \mu F$ capacitor is used on the LED powerline to help provide current 
 while the power supply adjusts to the \textbf{varying load demands}. Since we also need a signal return for the LED data pin, the board's ground was  connected to the power supply's ground. 
 
 Finally, two buttons and one potentiometer are connected to the Arduino Nano to give tactile control over the light.  The potentiometer controls the intensity of the light, while the two buttons give us access to a menu. The first button cycles through two states, ``\textbf{static light mode}'' and ``\textbf{light cycle mode}''.  With static light, we get a fixed color that can be changed with the second button. Instead, with the light cycle mode, we get a perpetually changing color, where the second button controls how fast the cycle is.
@@ -911,7 +902,7 @@ For example, in our case, the negative prompt was: ``Distorted eyes, distorted m
 
 It is essential to notice that a high number of steps will result in the model ``hallucinating'' too many details, distorting the final image. In Figure~\ref{fig:grid-santini}, we can see how the \textbf{denoising strength} (on the left) and the \textbf{$\alpha$ parameter} (on top) of the LoRA model affect the diffusion. 
 
-The denoising strength describes how much the final image will resemble the original one, while $\alpha$ indicates the weight of the LoRA model. Of course, there are no correct values to use, but through testing, a denoising strength of $0.4$ and an $\alpha$ of $1$ were optimal for Deepfake generation when a LoRA model is used. 
+The denoising strength describes how much the final image will resemble the original one, while $\alpha$ indicates the weight of the LoRA model. Of course, there are no correct values to use, but through testing, a denoising strength of $0.4$ and an $\alpha$ of $1$ were optimal for deepfake generation when a LoRA model is used. 
 
 \begin{figure}[t]
 	\centering
@@ -942,7 +933,7 @@ This parameter indicates how much the diffusion process will adhere to the promp
 
 
 The final thing to consider is the \textbf{ControlNet canny preprocessing}. 
-The canny preprocessing is controlled through a low threshold and a high threshold. 
+The canny pre-processing is controlled through a low threshold and a high threshold. 
 Unfortunately, at the time of writing this paper, there are no ways of  controlling these two through the API.
 Our objective, in this case, is to obtain an image similar to Figure~\ref{fig:canny-project},  where essential parts like mouth, nose shape, and eyes are highlighted without too many details. 
 
@@ -1065,22 +1056,22 @@ The training helper window (Figure~\ref{fig:training-helper}) offers a companion
 	\caption{Examples of errors.}\label{fig:errors}
 \end{figure}
 
-Even though the software can give consistent results, these are far from perfect. In fact, during the development, the main focus was on achieving a \textbf{non-detectable Deepfake}. The \emph{frame-to-frame coherence} problem was resolved through ControlNet  canny model used on cropped frames with a locked noise seed.  Some examples of detectable problems can be seen in Figure~\ref{fig:error-eyebrows} and Figure~\ref{fig:error-eyes},  where the software creates distorted faces. 
+Even though the software can give consistent results, these are far from perfect. In fact, during the development, the main focus was on achieving a \textbf{non-detectable deepfake}. The \emph{frame-to-frame coherence} problem was resolved through ControlNet  canny model used on cropped frames with a locked noise seed.  Some examples of detectable problems can be seen in Figure~\ref{fig:error-eyebrows} and Figure~\ref{fig:error-eyes},  where the software creates distorted faces. 
 
 These problems can be resolved in the future by implementing a better \emph{mask-creation algorithm} or even allowing the user to re-generate only broken frames. We still need to find out what a new and continuously improving technology like Stable Diffusion could be in the following years so the solution might be completely different. The final video is still a $12$ FPS video, so implementing an \emph{ML-based frame interpolator} could achieve  $24$ or even $60$ FPS for more fluidity.  The GUI presented was to test all the components organically. However, the software could effortlessly become a \textbf{mobile application}, doing heavy calculations on a server, opening the possibility to widespread use.
 
 
 \section{Related Work}\label{sect:related}
-The high interest in deepfake generation and detection can also be appreciated in the high number of references in the scientific literature. For example, recent surveys are \cite{survey1,survey2}.
+The high interest in deepfake generation and detection can also be appreciated in the high number of references in the scientific literature. For example, recent surveys are \cite{survey1,survey2}. detection~\cite{surveydet}
 
 As previously introduced, the interest of scientists has focused mainly on generation and detection. Considering detection, in \cite{detection1} the authors,
 
 
 
 \section{Conclusion}\label{ch:conclusion}
-In conclusion, this thesis has proposed a novel approach to Deepfake creation using Stable Diffusion, ControlNet, and LoRA. By combining these three techniques, we have shown that creating highly realistic and almost stable Deepfakes with complete control over their features and quality is possible. 
+In conclusion, this thesis has proposed a novel approach to deepfake creation using Stable Diffusion, ControlNet, and LoRA. By combining these three techniques, we have shown that creating highly realistic and almost stable deepfakes with complete control over their features and quality is possible. 
 
-Furthermore, we have demonstrated how to fine-tune a Stable Diffusion model through LoRA,  allowing us to generate new faces not present in the original datasets. How ControlNet can help us achieve more frame-to-frame consistency during the diffusion process, and finally, how all these models can be implemented in a single standalone application to generate Deepfakes. Since MediaPipe supports multi-face detection, future versions of this software could expand the possibilities to a multi-face Deepfake solution. Given that this solution could be slow with the current pipeline, a possibility is to distribute the diffusion process on multiple machines. This strategy could also give the possibility to do all the calculations on remote servers allowing the software to become a lightweight client app on a mobile phone. The mobile application could also help the Deepfake technology to become easier to employ for a larger number of users due to the low need for processing power. In future software versions, there will be the possibility to manage ControlNet parameters and change the current ControlNet model, making the diffusion process easier to adjust to the user's needs.
+Furthermore, we have demonstrated how to fine-tune a Stable Diffusion model through LoRA,  allowing us to generate new faces not present in the original datasets. How ControlNet can help us achieve more frame-to-frame consistency during the diffusion process, and finally, how all these models can be implemented in a single standalone application to generate deepfakes. Since MediaPipe supports multi-face detection, future versions of this software could expand the possibilities to a multi-face deepfake solution. Given that this solution could be slow with the current pipeline, a possibility is to distribute the diffusion process on multiple machines. This strategy could also give the possibility to do all the calculations on remote servers allowing the software to become a lightweight client app on a mobile phone. The mobile application could also help the deepfake technology to become easier to employ for a larger number of users due to the low need for processing power. In future software versions, there will be the possibility to manage ControlNet parameters and change the current ControlNet model, making the diffusion process easier to adjust to the user's needs.
 
 The current software does not replicate the original audio to the output video. To solve this problem, we could copy the original audio to the final video or implement an ML-based solution to generate the audio with the target subject's voice. However, this last solution also creates the need to implement a training strategy for the audio component. Finally, the last improvement could be an ML-based frame interpolation strategy, resulting in a $24$ FPS or even 60 FPS output video.
 
