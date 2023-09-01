@@ -64,7 +64,7 @@
 
 
 \begin{abstract} 
-We propose a new technique to generate deepfake videos based on Stable Diffusion, ControlNet, and Low-Rank Adaptation (LoRA).
+We propose a new and different approach (with respect to \emph{Generative Adversarial Networks}, or \emph{GANs}) to generate deepfake videos based on Stable Diffusion, ControlNet, and Low-Rank Adaptation (LoRA). By using Stable Diffusion we  have more control and fine-tuning possibility on the generation process. With respect to creating deepfakes with GANs, the proposed technique allows for quickly and more easily modifying the obtained video, by  using a text prompt, adding/removing some details, and changing the style  and the context of the deepfake. In this paper, we describe all the used techniques, the generation pipeline, and then we describe the application interface that has been developed for the generation.
 \end{abstract}
 
 \begin{keyword}
@@ -458,13 +458,13 @@ ControlNet is used to generate a trainable copy of the $12$ encoding blocks and 
 	L = \mathbb{E}_{z_0,t,c_t,c_f,\epsilon \sim \mathcal{N}(0,1)}\left[||\epsilon-\epsilon_\theta(z_t,t,c_t,c_f)||^2 \right]
 \end{equation}
 
-where $c_t$ are the text prompts and $c_f$ are task-specific conditions. These are all the types of conditioning available with ControlNet: Canny Edge, Hough Line, HED boundary, User Sketching, Human Pose (Openpose\footnote{Openpose github: \url{https://github.com/CMU-Perceptual-Computing-Lab/openpose}.}), Semantic Segmentation, Depth, Normal Maps, Cartoon Line Drawing.
+\noindent where $c_t$ are the text prompts and $c_f$ are task-specific conditions. These are all the types of conditioning available with ControlNet: Canny Edge, Hough Line, HED boundary, User Sketching, Human Pose (Openpose\footnote{The GitHub repository of Openpose: \url{https://github.com/CMU-Perceptual-Computing-Lab/openpose}.}), Semantic Segmentation, Depth, Normal Maps, Cartoon Line Drawing.
 
 
 \begin{figure}[t]
 	\centering
 	\includegraphics[scale=0.8]{img/background_img/ControlnetDemo.png}
-	\caption{Controlling Stable Diffusion with Canny edges (the panting is ``La Belle Ferronni{\`e}re'' by Leonardo da Vinci).}
+	\caption{Controlling Stable Diffusion with Canny edges (one of the panting titles is ``La Belle Ferronni{\`e}re'' by Leonardo da Vinci).}
 	\label{fig:canny}
 \end{figure}
 
@@ -506,7 +506,7 @@ $\Delta W = BA$ is zero.
 
 \subsection{MediaPipe}
 
-\emph{MediaPipe}\footnote{MediaPipe web page: \url{https://mediapipe.dev/}.}  is an open-source framework for building pipelines to perform computer vision  inference over arbitrary sensory data such as video or audio. MediaPipe offers the following solutions:
+\emph{MediaPipe}\footnote{MediaPipe Web page: \url{https://mediapipe.dev/}.}  is an open-source framework for building pipelines to perform computer vision  inference over arbitrary sensory data such as video or audio. MediaPipe offers the following solutions:
 Face Detection, Face Mesh,  Iris Detection, Hands Detection, Pose Detection, Holistic, Selfie Segmentation, Hair Segmentation, Object Detection, Box Tracking, Instant Motion Tracking, Objectron (3D), KNIFT, AutoFlip, MediaSequence, YouTube 8M. For this project, we will focus on the \emph{Face Detection} and \emph{Face Mesh} solutions, described in the following paragraphs.
 
 \paragraph{Face Detection}
@@ -588,7 +588,7 @@ The method used to generate deepfakes is similar to the one explained in Section
 \section{Our Approach} \label{ch:project}
 
 In this section, we will see how all the technologies presented in the previous  section can be used to create an application to generate deepfakes through Stable Diffusion.  Starting from how the input video needs to be processed.  We will then understand how we can use LoRA and Stable Diffusion with ControlNet to  generate images of a target subject and how these images can be applied to the input video, 
-creating a real deepfake.  Finally, we will understand the problems of this process and how they can be improved. We developed our project code in Python, and the repository is freely available online.\footnote{The GitHub repository of our  implementation: \url{https://github.com/edoardotavassi/SCL_deepfake}.}
+creating a real deepfake.  Finally, we will understand the problems of this process and how they can be improved. We developed our project code in Python, and the repository is freely available online.\footnote{The GitHub repository of our  implementation: \url{https://github.com/edoardotavassi/SCL_deepfake}.} The created deepfake aims at replace the face of one author of this paper (Edoardo Tavassi, top of  Figure~\ref{fig:training-ae}) with the face of another author (Francesco Santini, bottom of  Figure~\ref{fig:training-ae}).
 
 
 
@@ -778,7 +778,7 @@ The GUI allows us to set the training parameters and run the required
 CLI commands to train the model with just \textbf{7GB of VRAM}. 
 The first step is to prepare the dataset. For this purpose, 
 a video of the target subject doing \textbf{multiple facial expressions} in \textbf{different lighting conditions} 
-is required. In our case, a 2-minute video of professor Francesco Santini was recorded with a phone. 
+is required. In our case, a 2-minute video of one of the authors(Francesco Santini) was recorded with a phone. 
 The 60 FPS video was then lowered to \textbf{30 FPS}, and with \emph{MediaPipe Face Detection},
 the face was extracted from all the frames in the same way proposed in Section \ref{sec:face_detection}.
 Having the model trained on a dataset of $512\times 512$ images similar to the input images 
@@ -878,7 +878,7 @@ The denoising strength describes how much the final image will resemble the orig
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\textwidth, keepaspectratio]{img/project_img/cfg-examples.png}
-	\caption{How the CFG scale affects the image generation (towards Leonardo DiCaprio).}
+	\caption{How the CFG scale affects the image generation (towards Hollywood movie actor Leonardo DiCaprio).}
 	\label{fig:cfg-examples}
 \end{figure}
 
@@ -1037,6 +1037,8 @@ The high interest in deepfake generation and detection can also be appreciated i
 
 As previously introduced, the interest of scientists has focused mainly on generation and detection. Considering detection, in \cite{detection1} the authors,
 
+\todo[inline]{Finire}
+
 
 
 \section{Conclusion}\label{sect:conclusion}
@@ -1044,12 +1046,13 @@ In conclusion, this thesis has proposed a novel approach to deepfake creation us
 
 Furthermore, we have demonstrated how to fine-tune a Stable Diffusion model through LoRA,  allowing us to generate new faces not present in the original datasets. This may be an advantage with respect to GAN-based models, which depends more on the training set for this specific case. We also showed how ControlNet can help us achieve more frame-to-frame consistency during the diffusion process, and finally, how all these models can be implemented in a single standalone application to generate deepfakes. 
 
-Indeed we are aware of both advantages and disadvantages of Stable Diffusion with respect to GANs: the main intent of this paper is just to propose a new approach to the generation of deepfakes with respect to the literature, and to continue and foster research in the direction of diffusion approaches to deepfakes. For example, in the future GANs could be incorporated into diffusion-based models to enhance the generative process and  used to fine-tune the samples generated by a diffusion model, making them even more realistic.
+Indeed we are aware of both advantages and disadvantages of Stable Diffusion with respect to GANs: the main intent of this paper is just to propose a new approach to the generation of deepfakes with respect to the literature, and to continue and foster research in the direction of diffusion approaches to deepfakes. For example, the diffusion process can be used as a regularization technique during the training of GANs and help stabilize GAN training and improve the diversity and quality of generated samples~\cite{mix}.
+Moreover, it is possible to use a GAN  in diffusion models: for example, by predicting clean data from a noisy sample at intermediate time of diffusion sampling process~\cite{ganindiff1}, or by generating samples at intermediate diffusion time steps, then applying diffusion models to denoise these samples~\cite{ganindiff2}.
 
 
-Since MediaPipe supports multi-face detection, future versions of this software could expand the possibilities to a multi-face deepfake solution. Given that this solution could be slow with the current pipeline, a possibility is to distribute the diffusion process on multiple machines. This strategy could also give the possibility to do all the calculations on remote servers allowing the software to become a lightweight client app on a mobile phone. The mobile application could also help the deepfake technology to become easier to employ for a larger number of users due to the low need for processing power. In future software versions, there will be the possibility to manage ControlNet parameters and change the current ControlNet model, making the diffusion process easier to adjust to the user's needs.
+Since MediaPipe supports multi-face detection, future versions of this software could expand the possibilities to a multi-face deepfake solution. Given that this solution could be slow with the current pipeline, a possibility is to distribute the diffusion process on multiple machines. This strategy could also give the possibility to do all the calculations on remote servers allowing the software to become a lightweight client app on a mobile phone. A mobile application could also help the deepfake technology to become easier to employ for a larger number of users due to the low need for processing power. In future software versions, there will be the possibility to manage ControlNet parameters and change the current ControlNet model, making the diffusion process easier to adjust to the user's needs.
 
-The current software does not replicate the original audio to the output video. To solve this problem, we could copy the original audio to the final video or implement an ML-based solution to generate the audio with the target subject's voice. However, this last solution also creates the need to implement a training strategy for the audio component. Finally, the last improvement could be an ML-based frame interpolation strategy, resulting in a $24$ FPS or even 60 FPS output video.
+The current software does not replicate the original audio to the output video. To solve this problem, we could copy the original audio to the final video or implement an ML-based solution to generate the audio with the target subject's voice. However, this last solution also creates the need to implement a training strategy for the audio component. Finally, the last improvement could be an ML-based frame interpolation strategy, resulting in a $24$ FPS or even $60$ FPS output video.
 
 
 
