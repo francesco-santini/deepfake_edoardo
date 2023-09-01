@@ -94,7 +94,7 @@ ControlNet~\cite{zhang2023adding} is a neural network structure to control pre-t
 
 Therefore, we propose a different approach to generate deepfakes with respect to the literature, which is mostly based on GANs~\cite{surveydgen1} (see Section~\ref{sect:related}). In our case, at the core of the proposal we have Stable Diffusion instead: Stable Diffusion and GANs are distinct approaches to generative modeling: the former gradually transforms a simple initial distribution (often noise) into a complex target distribution (the desired one), while in GANs two neural networks, i.e., a generator and a discriminator, are trained in a competitive manner  to learn to generate samples. 
 
-Using Stable Diffusion allows for a fast prototyping of the deepfake because of several reasons: first, there is the possibility for a user to use a textual description to describe the deepfake to be generated, making it possible to quickly modify it. Moreover, due to its characteristics, it is also possible to easily change the style of the image (e.g., summer to winter, or from realistic to cartoonish), or to add different details to the deepfake (e.g., some objects in the background). Indeed, Stable Diffusion models tend to be in general more computationally demanding than GANs due to their iterative nature, especially when dealing with larger and more complex datasets. However, the training process is in general more stable than GANs (which may suffer from the \emph{mode collapse} problem), and  it is more fine-grained. Moreover, some first results show that it is possible to achieve higher-quality synthetic images~\cite{dmbetter}.
+Using Stable Diffusion allows for a fast design and prototyping of the deepfake because of several reasons: first, there is the possibility for a user to use a textual description to describe the deepfake to be generated, making it possible to quickly modify it. Moreover, due to its characteristics, it is also possible to easily change the style of the image (e.g., summer to winter, or from realistic to cartoonish), or to add different details to the deepfake (e.g., some objects in the background). Indeed, Stable Diffusion models tend to be in general more computationally demanding than GANs due to their iterative nature, especially when dealing with larger and more complex datasets. However, the training process is in general more stable than GANs (which may suffer from e.g. the \emph{mode collapse} problem), and  it is more fine-grained. Moreover, some scientific results show that it is possible to achieve higher-quality synthetic images than GANs~\cite{dmbetter,dmbetter2}, and also videos~\cite{dmbetter3}.\footnote{Since the recent and continuous developments in both GANs and diffusion models, we think that a comprehensive and deep comparison of these two techniques is still not possible at the time of writing.}
 
 This paper comprehensively analyzes all the technology needed to achieve such results and showcases a complete standalone software to generate deepfakes with this novel approach.  This papers aims to contribute to the ongoing development of 
 deepfake technology while also promoting a responsible and ethical use of this powerful tool.  In addition, we hope that this approach will inspire further research in this area and lead to the creation of even more advanced and innovative deepfake techniques, as for example mixing GANs and Stable diffusion together~\cite{mix} (se also the conclusions of this paper in Section~\ref{sect:conclusion}).
@@ -255,7 +255,7 @@ Given that the variance $\Sigma_\theta$ is fixed to a certain schedule: ``First,
 The neural network solely needs to \textbf{learn the mean} $\mu_\theta$.
 The neural network was then improved in the \emph{Improved diffusion models} paper~\cite{nichol2021improved}, where it was trained to learn both the mean and the variance.
 The loss function would be the \textbf{negative log-likelihood} $-log(p_\theta(x_0))$. 
-However, since $p_\theta(x_0)$ is not nicely computable, as it depends on all the other time steps coming before  $x_0$ starting at $x_T$, we can instead use the \emph{Variational lower bound} (ELBO) 
+However, since $p_\theta(x_0)$ is not nicely computable, as it depends on all the other time steps coming before  $x_0$ starting at $x_T$, we can instead use the \emph{Variational Lower Bound} (\emph{ELBO})~\cite{elbo} 
 to minimize the negative log-likelihood with respect to ground truth data sample $x_0$.
 This is possible because the combination of $q$ and $p_\theta$ can be seen as a VAE.
 The ELBO for this process is defined as the \textbf{sum of losses} at each time step $t, L_0 + L_1 + \dots + L_T$.
@@ -364,7 +364,7 @@ as in the pure Diffusion model.
 
 \subsubsection{The Text Encoder}
 
-The \emph{Transformer language model} used as the language understanding component inside the LDM is \emph{ClipText}, based on the OpenAI CLIP model.
+The \emph{Transformer language model} used as the language understanding component inside the LDM is \emph{ClipText}, based on the OpenAI CLIP model.\footnote{OpenAI CLIP: \url{https://openai.com/research/clip}.}
 CLIP stands for \textbf{Constastive Language-Image Pretraining} and is an open-source, multi-modal, zero-shot model. 
 Given an image and text description, the model can predict the most relevant text description for that image without 
 optimizing for a particular task.
@@ -458,28 +458,17 @@ ControlNet is used to generate a trainable copy of the $12$ encoding blocks and 
 	L = \mathbb{E}_{z_0,t,c_t,c_f,\epsilon \sim \mathcal{N}(0,1)}\left[||\epsilon-\epsilon_\theta(z_t,t,c_t,c_f)||^2 \right]
 \end{equation}
 
-where $c_t$ are the text prompts and $c_f$ are task-specific conditions. Here are all the types of conditioning available with ControlNet:
+where $c_t$ are the text prompts and $c_f$ are task-specific conditions. These are all the types of conditioning available with ControlNet: Canny Edge, Hough Line, HED boundary, User Sketching, Human Pose (Openpose\footnote{Openpose github: \url{https://github.com/CMU-Perceptual-Computing-Lab/openpose}.}), Semantic Segmentation, Depth, Normal Maps, Cartoon Line Drawing.
 
-\begin{itemize}
-	\item Canny edge.
-	\item Hough line.
-	\item HED boundary.
-	\item User Sketching.
-	\item Human pose (Openpose\footnote{Openpose github: \url{https://github.com/CMU-Perceptual-Computing-Lab/openpose}.}).
-	\item Semantic segmentation.
-	\item Depth.
-	\item Normal Maps.
-	\item Cartoon Line Drawing.
-\end{itemize}
 
 \begin{figure}[t]
 	\centering
 	\includegraphics[scale=0.8]{img/background_img/ControlnetDemo.png}
-	\caption{Controlling Stable Diffusion with Canny edges.}
+	\caption{Controlling Stable Diffusion with Canny edges (the panting is ``La Belle Ferronni{\`e}re'' by Leonardo da Vinci).}
 	\label{fig:canny}
 \end{figure}
 
-Figure~\ref{fig:canny} shows how the \textbf{Canny edge conditioning} can be used to control the diffusion process.
+Figure~\ref{fig:canny} shows how the \textbf{Canny Edge Conditioning} can be used to control the diffusion process.
 This leads to the creation of novel images retaining the same underlying structure while exhibiting diverse styles and subjects.
 ControlNet enhances the preservation of important \textbf{structural features} during the diffusion process, contributing to the production of visually compelling and contextually rich variations, resulting in new images with the same structure but different styles and subjects.
 
@@ -517,30 +506,8 @@ $\Delta W = BA$ is zero.
 
 \subsection{MediaPipe}
 
-\emph{MediaPipe}\footnote{MediaPipe web page: \url{https://mediapipe.dev/}.} 
-is an open-source framework for building pipelines to perform computer vision 
-inference over arbitrary sensory data such as video or audio.
-MediaPipe offers the following solutions:
-
-\begin{itemize}
-	\item Face Detection.
-	\item Face Mesh.
-	\item Iris Detection.
-	\item Hands Detection.
-	\item Pose Detection.
-	\item Holistic.
-	\item Selfie Segmentation.
-	\item Hair Segmentation.
-	\item Object Detection.
-	\item Box Tracking.
-	\item Instant Motion Tracking.
-	\item Objectron (3D).
-	\item KNIFT.
-	\item AutoFlip.
-	\item MediaSequence.
-	\item YouTube 8M.
-\end{itemize}
-But for this project, we will focus on the \emph{Face Detection} and \emph{Face Mesh} solutions.
+\emph{MediaPipe}\footnote{MediaPipe web page: \url{https://mediapipe.dev/}.}  is an open-source framework for building pipelines to perform computer vision  inference over arbitrary sensory data such as video or audio. MediaPipe offers the following solutions:
+Face Detection, Face Mesh,  Iris Detection, Hands Detection, Pose Detection, Holistic, Selfie Segmentation, Hair Segmentation, Object Detection, Box Tracking, Instant Motion Tracking, Objectron (3D), KNIFT, AutoFlip, MediaSequence, YouTube 8M. For this project, we will focus on the \emph{Face Detection} and \emph{Face Mesh} solutions, described in the following paragraphs.
 
 \paragraph{Face Detection}
 
@@ -569,7 +536,8 @@ The second is a \emph{3D face landmark model} \cite{kartynnik2019realtime} that 
 approximate 3D surface via regression. In Figure~\ref{fig:MediapipeDemo}, we can observe a representation of the output.
 
 
-
+\subsection{The Two Main Approaches to Generate Deepfakes}\label{sect:vaegan}
+In Section~\ref{sec:deep-vae} and Section~\ref{sect:vaegan} we describe two key approaches to generate deepfakes: respectively, deepfakes generated with Autoencoders and Variational Autoencoders, and deepfakes generated with VAE/GAN.
 
 \subsubsection{Deepfakes with Autoencoders (AE) and Variational Autoencoders (VAE)}\label{sec:deep-vae}
 
@@ -602,7 +570,7 @@ Then, as shown in Figure~\ref{fig:training-ae}, \textbf{two decoders are trained
 
 
 
-\subsubsection{Deepfakes with VAE/GAN}
+\subsubsection{Deepfakes with VAE/GAN}\label{sect:vaegan}
 
 \begin{figure}[b]
 	\centering
@@ -620,16 +588,16 @@ The method used to generate deepfakes is similar to the one explained in Section
 \section{Our Approach} \label{ch:project}
 
 In this section, we will see how all the technologies presented in the previous  section can be used to create an application to generate deepfakes through Stable Diffusion.  Starting from how the input video needs to be processed.  We will then understand how we can use LoRA and Stable Diffusion with ControlNet to  generate images of a target subject and how these images can be applied to the input video, 
-creating a real deepfake.  Finally, we will understand the problems of this process and how they can be improved.
+creating a real deepfake.  Finally, we will understand the problems of this process and how they can be improved. We developed our project code in Python, and the repository is freely available online.\footnote{The GitHub repository of our  implementation: \url{https://github.com/edoardotavassi/SCL_deepfake}.}
 
 
 
-\subsection{Infographic} \label{sec:project_info}
+\subsection{Infographic}\label{sec:project_info}
 
 \begin{figure}[t]
 	\centering
 	\includegraphics[scale=0.65]{img/svg/Info.png}
-	\caption{Pipeline.}\label{fig:project}
+	\caption{Pipeline of the deepfake generation procedure.}\label{fig:project}
 \end{figure}
 
 
@@ -652,9 +620,9 @@ In Section ~\ref{sec:face_detection}, we will focus on automating the cropping o
 
 \subsubsection{Decreasing Frame Rate}\label{sec:decreasing_frame_rate}
 
-The first step of the \textbf{preprocessing pipeline} is decreasing the frame rate to \textbf{12 FPS}. 
+The first step of the \textbf{preprocessing pipeline} is decreasing the frame rate to \textbf{12 FPS} (see Figure~\ref{fig:project}). 
 This processing saves time later during the diffusion phase, having fewer frames to work on. 
-Twelve frames per second is the frame rate used in all major animation studios to ensure the minimum number of  frames while maintaining fluidity in a video. A python library called \emph{OpenCV}\footnote{OpenCV website: \url{https://opencv.org/}.} 
+Twelve frames per second is the frame rate used in all major animation studios to ensure the minimum number of  frames while maintaining fluidity in a video. The Python interface to \emph{OpenCV}\footnote{OpenCV website: \url{https://opencv.org/}.} 
 was used to achieve this goal.  First, a function called ``\textbf{get-saving-frames-durations}'' returns the list of durations where to save the frames; this is done by creating a list of evenly spaced time points from $t=0$ to the end of the video, with a step of $1/12$. 
 
 After this, the primary function extracts the earliest saving time from the list of durations; 
@@ -690,13 +658,13 @@ If this one is less than or equal to the current frame duration, calculated by d
 
 
 The next step is to crop just the face.  This decision is to help Stable Diffusion stay \textbf{consistent} through every frame during diffusion since the noise added is the same,  resulting in a similar output for each frame (\textbf{the seed is locked}).  In addition, the decrease in image size also helps reduce the time needed for diffusion. 
-To achieve this result, we use \emph{MediaPipe Face Detection} that, given an input frame,  returns a \textbf{proto message} that contains a \textbf{bounding box} and \textbf{six key points} (right eye, left eye, nose tip, mouth center, right ear tragion, and left ear tragion). 
+To achieve this result, in Figure~\ref{fig:project} we use \emph{MediaPipe Face Detection} that, given an input frame,  returns a \textbf{proto message} that contains a \textbf{bounding box} and \textbf{six key points} (right eye, left eye, nose tip, mouth center, right ear tragion, and left ear tragion). 
 The bounding box is composed of $xmin$ and $width$ by $ymin$ and $height$, all normalized to $[0.0, 1.0]$. 
 At the same time, each key point is composed of $x$ and $y$, which are also normalized to $[0.0, 1.0]$ by the image width and height, respectively. 
 
 \FloatBarrier
 
-Since the bounding box is right on the face, a \textbf{padding of 30 pixels} was added to ensure a full face capture. Then all the bounding box points get saved to a \emph{PKL file} for later use.  An example of a cropped frame can be seen in Figure~\ref{fig:cropped}. After cropping, all the images are resized to $512 \times 512$ to ensure further \textbf{coherence} during diffusion.  The next step is to compute the face mask.  This is done through \emph{MediPipe Face Mesh} that, given an input frame, returns a list of \textbf{468 face landmarks}  where each landmark is composed of $x$, $y$, and $z$, all normalized to  $[0.0, 1.0]$.  Next, we must find the \emph{convex hull} of all the returned landmarks to locate the face mask points, considering only the $x$ and $y$ coordinates. 
+Since the bounding box is right on the face, a \textbf{padding of 30 pixels} was added to ensure a full face capture. Then all the bounding box points get saved to a \emph{PKL file} for later use.  An example of a cropped frame can be seen in Figure~\ref{fig:cropped}. After cropping, all the images are resized to $512 \times 512$ to ensure further \textbf{coherence} during diffusion.  The next step is to compute the face mask.  In Figure~\ref{fig:project} this is done through \emph{MediPipe Face Mesh} that, given an input frame, returns a list of \textbf{468 face landmarks}  where each landmark is composed of $x$, $y$, and $z$, all normalized to  $[0.0, 1.0]$.  Next, we must find the \emph{convex hull} of all the returned landmarks to locate the face mask points, considering only the $x$ and $y$ coordinates. 
 This was done with \emph{Graham's scan algorithm} \cite{GRAHAM1972132} that works in $O(n log n)$ time. Let us consider an array of $n$ points, following is Graham's scan algorithm:
 
 
@@ -749,9 +717,10 @@ was used to operate Stable Diffusion.
 This interface offers all Stable Diffusion modules optimized for \textbf{lower VRAM usage}, down to 2GB. 
 The software creates a \textbf{local server on port $7860$} and,  using the \emph{Xformers library}\footnote{Xformers Github: \url{https://github.com/facebookresearch/xformers}.} further speeds up the image generation process on \textbf{Nvidia GPUs}.
 
-The most exciting part is that this software offers an extension module to  implement ControlNet and LoRA models with just a click.  To call a LoRA model for diffusion, we need to write in the prompt ``\textbf{<lora:ModelName:$\alpha$>}'',  where ModelName is the name of the model file without the extension,  and $\alpha$ is the weight applied to the LoRA model that goes from $0$ to $1$ (with $0$ the model is disabled). 
+One of the most interesting parts is that this software offers an extension module to  implement ControlNet and LoRA models with just a click.  To call a LoRA model for diffusion, we need to write ``\textbf{<lora:ModelName:$\alpha$>}'' in the prompt,
+where ModelName is the name of the model file without the extension,  and $\alpha$ is the weight applied to the LoRA model that goes from $0$ to $1$ (with $0$ the model is disabled). 
 
-Given that the application developed for this project is standalone,  we need a way to communicate with the web UI. We can use the \emph{API} the local server offers for this.
+Given that the application developed for this project is standalone,  we need a way to communicate with the web UI (Figure~\ref{fig:project}). We can use the \emph{API} the local server offers for this.
 We can communicate with the Stable Diffusion web UI through simple 
 POST and GET requests through an \textbf{HTTP communication}. 
 
@@ -804,7 +773,7 @@ and the second one is the result of the ControlNet canny preprocessing of the in
 	\label{fig:lora-webui}
 \end{figure*}
 
-To train a LoRA model, a \emph{Windows-focused Gradio GUI}\footnote{Kohya webui github: \url{https://github.com/bmaltais/kohya_ss}.} for \emph{Kohya's Stable Diffusion trainers}\footnote{Kohya ss scripts github: \url{https://github.com/kohya-ss/sd-scripts}.} was used. 
+To train a LoRA model (right side of Figure~\ref{fig:project}), a \emph{Windows-focused Gradio GUI}\footnote{Kohya webui github: \url{https://github.com/bmaltais/kohya_ss}.} for \emph{Kohya's Stable Diffusion trainers}\footnote{Kohya ss scripts github: \url{https://github.com/kohya-ss/sd-scripts}.} was used. 
 The GUI allows us to set the training parameters and run the required 
 CLI commands to train the model with just \textbf{7GB of VRAM}. 
 The first step is to prepare the dataset. For this purpose, 
@@ -909,7 +878,7 @@ The denoising strength describes how much the final image will resemble the orig
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\textwidth, keepaspectratio]{img/project_img/cfg-examples.png}
-	\caption{How the CFG scale affects the image generation.}
+	\caption{How the CFG scale affects the image generation (towards Leonardo DiCaprio).}
 	\label{fig:cfg-examples}
 \end{figure}
 
@@ -957,7 +926,7 @@ The final step of this process is to apply the diffused images to the initial fr
 To complete this process, the software cycles through all the \textbf{diffused images}  and finds the corresponding \textbf{initial frame} and \textbf{mask} for each one. 
 Then, to find where to apply them, the software utilizes the \emph{PKL file} containing all the original bounding box sizes and locations.  First, the image gets resized to its original size and then pasted  to its correct position on the initial frame with its mask. 
 An example of a final frame can be seen in Figure~\ref{fig:output}.
-Ultimately, all the final frames get united into a single \textbf{12 FPS AVI file} with the help of OpenCV.
+Ultimately, all the final frames get united into a single \textbf{12 FPS AVI file} with the help of OpenCV. A video summarizing all the main steps of the generation pipeline can be found on Youtube.\footnote{A video showing the initial frames, the result of Stable Diffusion, the application of the mask on the face, and the final result: \url{https://www.youtube.com/shorts/OcuALrcSxfc}.}
 
 
 
@@ -1071,9 +1040,14 @@ As previously introduced, the interest of scientists has focused mainly on gener
 
 
 \section{Conclusion}\label{sect:conclusion}
-In conclusion, this thesis has proposed a novel approach to deepfake creation using Stable Diffusion, ControlNet, and LoRA. By combining these three techniques, we have shown that creating highly realistic and almost stable deepfakes with complete control over their features and quality is possible. 
+In conclusion, this thesis has proposed a novel approach to deepfake creation using Stable Diffusion, ControlNet, and LoRA. By combining these three techniques, we have shown that creating highly realistic and almost stable deepfakes with complete control over their features and quality is possible. With respect to GAN, the proposed approach allows for quickly and more easily modifying the obtained video, by  using a text prompt, adding/removing some details, and changing the style  and the context of the deepfake. With Stable Diffusion it is also possible to have more control on the fine-tuning of the result, and to avoid some training problems which may happen in GANs (e.g., the mode collapse problem).
 
-Furthermore, we have demonstrated how to fine-tune a Stable Diffusion model through LoRA,  allowing us to generate new faces not present in the original datasets. How ControlNet can help us achieve more frame-to-frame consistency during the diffusion process, and finally, how all these models can be implemented in a single standalone application to generate deepfakes. Since MediaPipe supports multi-face detection, future versions of this software could expand the possibilities to a multi-face deepfake solution. Given that this solution could be slow with the current pipeline, a possibility is to distribute the diffusion process on multiple machines. This strategy could also give the possibility to do all the calculations on remote servers allowing the software to become a lightweight client app on a mobile phone. The mobile application could also help the deepfake technology to become easier to employ for a larger number of users due to the low need for processing power. In future software versions, there will be the possibility to manage ControlNet parameters and change the current ControlNet model, making the diffusion process easier to adjust to the user's needs.
+Furthermore, we have demonstrated how to fine-tune a Stable Diffusion model through LoRA,  allowing us to generate new faces not present in the original datasets. This may be an advantage with respect to GAN-based models, which depends more on the training set for this specific case. We also showed how ControlNet can help us achieve more frame-to-frame consistency during the diffusion process, and finally, how all these models can be implemented in a single standalone application to generate deepfakes. 
+
+Indeed we are aware of both advantages and disadvantages of Stable Diffusion with respect to GANs: the main intent of this paper is just to propose a new approach to the generation of deepfakes with respect to the literature, and to continue and foster research in the direction of diffusion approaches to deepfakes. For example, in the future GANs could be incorporated into diffusion-based models to enhance the generative process and  used to fine-tune the samples generated by a diffusion model, making them even more realistic.
+
+
+Since MediaPipe supports multi-face detection, future versions of this software could expand the possibilities to a multi-face deepfake solution. Given that this solution could be slow with the current pipeline, a possibility is to distribute the diffusion process on multiple machines. This strategy could also give the possibility to do all the calculations on remote servers allowing the software to become a lightweight client app on a mobile phone. The mobile application could also help the deepfake technology to become easier to employ for a larger number of users due to the low need for processing power. In future software versions, there will be the possibility to manage ControlNet parameters and change the current ControlNet model, making the diffusion process easier to adjust to the user's needs.
 
 The current software does not replicate the original audio to the output video. To solve this problem, we could copy the original audio to the final video or implement an ML-based solution to generate the audio with the target subject's voice. However, this last solution also creates the need to implement a training strategy for the audio component. Finally, the last improvement could be an ML-based frame interpolation strategy, resulting in a $24$ FPS or even 60 FPS output video.
 
