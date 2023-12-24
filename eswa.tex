@@ -94,7 +94,7 @@
 
 
 \abstract{
-We propose a new and different approach to generate deepfake videos based on \emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (\emph{LoRA}): in fact, the related work focuses in particular on \emph{Generative Adversarial Networks} (\emph{GANs}). Stable Diffusion gives us more control and fine-tuning possibilities in the generation process. Concerning creating deepfakes with GANs, the proposed technique allows for quick and easy modification of the obtained video by  using a text prompt, adding/removing some details, and changing the style  and context of the deepfake. In this paper, we describe all the techniques used and the generation pipeline, and then we describe the application interface developed for the generation.
+We propose a new and different approach to generate deepfake videos based on \emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (\emph{LoRA}): in fact, the related work focuses in particular on \emph{Generative Adversarial Networks} (\emph{GANs}). Stable Diffusion gives us more control and fine-tuning possibilities in the generation process. Concerning creating deepfakes with GANs, the proposed technique allows for quick and easy modification of the obtained video by  using a text prompt, adding/removing some details, and changing the style  and context of the deepfake. In this paper, we describe all the techniques used and the generation pipeline, and then we show the application interface developed for the generation.
 }
 
 
@@ -836,7 +836,7 @@ Having the model trained on a dataset of $512\times 512$ images similar to the i
 of the diffusion process helps us achieve a more consistent result. 
 Then, we need to eliminate all the blurred images from the dataset. 
 To perform \emph{blur detection}, we can use the \emph{variance of the Laplacian} \cite{903548}. 
-This simple method can be implemented with just a single line of code with the help of OpenCV. 
+This  method can be implemented  with the help of OpenCV. 
 First, we convolve a single channel of the input image with the \emph{Laplacian kernel}:
 
 \begin{equation}
