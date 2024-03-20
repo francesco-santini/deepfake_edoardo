@@ -1,0 +1,1134 @@
+\documentclass[sn-mathphys,Numbered]{sn-jnl}
+%\usepackage[english]{babel}
+%\usepackage[english]{babel}
+
+
+\usepackage{subcaption}
+
+%\usepackage{hyperref}
+\usepackage[table,xcdraw]{xcolor}
+%\usepackage[utf8]{inputenc}
+%\usepackage{setspace}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{pythonhighlight}
+
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\newcommand\myworries[1]{\textcolor{red}{#1}}
+
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{multirow}
+\usepackage{placeins}
+\usepackage{pdflscape}
+\usepackage{amsthm}
+
+\usepackage{graphicx}  
+\usepackage{array}
+\usepackage{booktabs} 
+\usepackage{pifont}
+
+
+\usepackage{multirow}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+
+\theoremstyle{thmstyleone}%
+\newtheorem{theorem}{Theorem}%  meant for continuous numbers
+%%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
+%% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
+\newtheorem{proposition}[theorem]{Proposition}% 
+%%\newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
+
+\theoremstyle{thmstyletwo}%
+\newtheorem{example}{Example}%
+\newtheorem{remark}{Remark}%
+
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}{Definition}%
+
+\raggedbottom
+%%\unnumbered% uncomment this for unnumbered level heads
+
+
+
+\begin{document}
+
+
+\title[Generating Deepfakes with Stable Diffusion, ControlNet and LoRA]{Generating Deepfakes with Stable Diffusion, ControlNet and LoRA: An Application}
+
+
+
+
+
+%\author[perugia]{Stefano Bistarelli}
+%\ead{stefano.bistarelli@unipg.it}
+%\author[perugia]{Francesco Santini\corref{cor1}}
+%\ead{francesco.santini@unipg.it}
+%\author[perugia]{Edoardo Toma Tavassi}
+%\ead{edoardotoma.tavassi@unipg.it}
+
+
+%\address[perugia]{Dipartimento di Matematica e  Informatica, University of Perugia, Italy}
+%\cortext[cor1]{Corresponding author}
+
+\author[1]{\fnm{Stefano} \sur{Bistarelli}}\email{stefano.bistarelli@unipg.it}
+
+\author*[1]{\fnm{Francesco} \sur{Santini}}\email{francesco.santini@unipg.it}
+
+\author[1]{\fnm{Edoardo} \sur{Toma Tavassi}}\email{edoardotoma.tavassi@unipg.it}
+
+\affil*[1]{\orgdiv{Department of Mathematics and Computer Science}, \orgname{University of Perugia}, \orgaddress{\street{Via Vanvitelli 1}, \city{Perugia}, \postcode{06063},  \country{Italy}}}
+
+
+
+
+\abstract{
+We propose a new and different approach to generate deepfake videos based on \emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (\emph{LoRA}): in fact, the related work focuses in particular on \emph{Generative Adversarial Networks} (\emph{GANs}). Stable Diffusion gives us more control and fine-tuning possibilities in the generation process. Concerning creating deepfakes with GANs, the proposed technique allows for quick and easy modification of the obtained video by  using a text prompt, adding/removing some details, and changing the style  and context of the deepfake. In this paper, we describe all the techniques used and the generation pipeline, and then we show the application interface developed for the generation.
+}
+
+
+
+%\linenumbers
+
+\keywords{Deepkafe, Stable Diffusion, ControlNet, Low-Rank Adaptation}
+
+%%\pacs[JEL Classification]{D8, H51}
+
+%%\pacs[MSC Classification]{35A01, 65L10, 65L12, 65L20, 65L70}
+
+\maketitle
+
+
+\section{Introduction}\label{sec:intro}
+Deepfakes have become a popular subject of discussion in recent years. 
+Even though digital picture and video creation and modification are not new (e.g., \cite{farid}), advances in machine learning and artificial intelligence have made it possible to create highly realistic digital media that can deceive even the most discerning eye. Deepfakes are synthetic media that have undergone digital manipulation to swap out one person's likeness for another convincingly.
+
+The deepfake videos can be used in exciting and inventive ways (e.g., in the movie industry). Still, because people strongly associate faces with  identities, they can also be turned into personal and social security-threats~\cite{securitythreat}. Well-made deepfakes  can generate the impression that a person is  engaged in actions that do not actually take place in reality: for instance, some criminal misuse examples are represented by revenge porn, fake news, hoaxes, bullying, and financial fraud~\cite{financialfraud}.
+Creating convincing deepfakes that are stable and with high-quality quality has proven  to be challenging and requires advanced techniques and algorithms~\cite{survey2}. 
+
+The first deepfake content was a celebrity pornographic movie made by a Reddit user named ``deepfakes'' in 2017 (soon banned from the social platform\footnote{Reddit bans ``deepfakes'' face-swap porn community: \url{https://www.theguardian.com/technology/2018/feb/08/reddit-bans-deepfakes-face-swap-porn-community}.}). The, \emph{FakeApp}\footnote{FakeApp: \url{https://www.malavida.com/en/soft/fakeapp/}.}, \emph{FaceSwap}\footnote{FaceSwap: \url{https://faceswap.dev}.}, \emph{FaceLab}\footnote{FaceLab: \url{https://www.deepfakevfx.com/downloads/deepfacelab/}.}, and other deepfake-based applications or Web services as \emph{Deepfakesweb}\footnote{Deepfakesweb: \url{https://deepfakesweb.com}.} started to arise shortly after. 
+The term ``deepfake'' has been applied more generally to any AI-generated videos that impersonate human beings.
+A general classification considers  four kinds of deepfake according to media types~\cite{surveydet}, as ``video with audio'', ``video without audio'', ``audio'', and ``image''; in this work, we consider ``video without audio'', as we focus on the generation of the video only.
+
+There are three main categories of deepfake videos~\cite{lyu}, which involve \emph{i)} \emph{head puppetry}, the target person's entire head and upper shoulders are synthesized from a video of the source person's head, giving the synthesized target the appearance of the source; \emph{ii)} \emph{face swapping} is the process of creating a video of the target with the faces of the source's synthesized faces swapped in while maintaining the same facial emotions; \emph{iii)} \emph{lip syncing}, in which the target is made to appear to pronounce words that they do not actually say by just moving the lip region. In this work, we focus on face swapping.
+
+
+We  explore a novel approach to deepfake generation by using  \emph{Stable Diffusion}, \emph{ControlNet}, and \emph{Low-Rank Adaptation} (LoRA). These three recently proposed techniques can be used in several image synthesis tasks, which will be described in detail in the following sections. Stable Diffusion is a deep learning, text-to-image model released in 2022,  and it is based on diffusion methods. Although it can be used for various tasks, including in-painting, out-painting, and creating image-to-image translations directed by text prompts, its primary application is to generate detailed images conditioned on text descriptions. Stable Diffusion is a \emph{Latent Diffusion} model~\cite{rombach2022highresolution}, and its code and model weights were made freely available to the public.
+ControlNet~\cite{zhang2023adding} is a neural network structure to control pre-trained large diffusion models (e.g., Stable Diffusion) to support additional input conditions. Finally, LoRA~\cite{hu2021lora} is a technique to optimize the fine-tuning of large-scale models: it freezes the pre-trained model weights while strongly reducing the number of trainable parameters for downstream tasks.
+
+Therefore, we propose a different approach to generate deepfakes concerning the literature, which is mainly based on \emph{Generative Artificial Neural Network} (\emph{GAN})~\cite{surveydgen1} (see Section~\ref{sect:related}). In our case, at the core of the proposal, we have Stable Diffusion instead. Stable Diffusion and GANs are distinct approaches to generative modeling: the former gradually transforms a simple initial distribution (often noise) into a complex target distribution (the desired one), while in GANs, two neural networks, i.e., a generator and a discriminator, are trained competitively  to learn to generate samples. 
+
+Using Stable Diffusion allows for a fast design and prototyping of the deepfake for several reasons: first, there is the possibility for a user to use a textual description to describe the deepfake to be generated, making it possible to modify it quickly. Moreover, due to its characteristics, it is also possible to easily change the style of the image (e.g., summer to winter, or from realistic to cartoonish) or to add different details to the deepfake (e.g., some objects in the background). Indeed, Stable Diffusion models tend to be more computationally demanding than GANs due to their iterative nature, especially when dealing with larger and more complex datasets. However, the training process is generally more stable than GANs (which may suffer from, e.g., the \emph{mode collapse} problem) and  is more fine-grained. Moreover, some scientific results show that it is possible to achieve higher-quality synthetic images than GANs~\cite{dmbetter,dmbetter2}, and videos~\cite{dmbetter3}.
+
+Using Stable Diffusion allows for a fast design and prototyping of the deepfake for several reasons: first, there is the possibility for a user to use a textual description to describe the deepfake to be generated, making it possible to modify it quickly. Moreover, due to its characteristics, it is also possible to easily change the style of the image (e.g., summer to winter, or from realistic to cartoonish) or to add different details to the deepfake (e.g., some objects in the background). Indeed, Stable Diffusion models tend to be, in general, more computationally demanding than GANs due to their iterative nature, especially when dealing with larger and more complex datasets. However, the training process is usually more stable than GANs, which may suffer from, e.g., the \emph{mode collapse} problem (characterizing only a few variations of the input distribution during training)~\cite{collapse}, and  it is more fine-grained. Moreover, some scientific results show that it is possible to achieve higher-quality synthetic images than GANs~\cite{dmbetter,dmbetter2}, and also videos~\cite{dmbetter3}.\footnote{Since the recent and continuous developments in both GANs and diffusion models, we think that a comprehensive and deep comparison of these two techniques is still not possible at the time of writing.}
+
+This paper comprehensively analyzes all the technology needed to achieve such results and showcases a complete standalone software to generate deepfakes with this novel approach. The sample deepfake in this video has been generated with this application and with limited data and computational resources: a 2-minute video only and an Nvidia RTX 3070 Ti with $8$GB of VRAM. Moreover, we developed an Arduino-driven custom light built with recycled materials with the purpose to 
+achieve multiple light conditions for our target subject while creating the training dataset.
+
+This paper aims to contribute to the ongoing development of 
+deepfake technology while promoting this powerful tool's responsible and ethical use.  In addition, we hope that this approach will inspire further research in this area and lead to the creation of even more advanced and innovative deepfake techniques, for example, mixing GANs and Stable diffusion together~\cite{mix} (see also the conclusions of this paper in Section~\ref{sect:conclusion}).
+
+
+
+In Section~\ref{sect:background}, we will survey the most important generative models, for example, GANs and Stable Diffusion.
+In Section~\ref{ch:project}, we will understand how all these models can be used to create a standalone application to generate deepfakes. Section~\ref{sect:related} summarizes the related work, while Section~\ref{sect:conclusion} provides conclusions and future work.
+
+
+\section{Background}\label{sect:background}
+
+
+In this section, we will analyze all the major technologies used to develop an application to generate 
+deepfakes through one of the newest generative models called Stable Diffusion. First, we list all the main generative models (Section~\ref{sec:imggenmodels}). In particular, we sequentially introduce GANs, \emph{Variational Autoencoders}, \emph{Flow-based models}, \emph{Diffusion models}, and some often embedded techniques such as \emph{Conditioned U-Net}, which has the purpose of controlling noise during the diffusion process~\cite{conditionedunet}.
+Afterward, Section~\ref{sec:stable-diffusion} shows  Stable Diffusion, which can condition the 
+generation of an image through a textual or graphical input.
+We  then explore how ControlNet  (Section~\ref{sect:controlnet}) and LoRA (Section~\ref{sect:lora}) can help us improve Stable Diffusion performances and unlock new fine-tuning possibilities. 
+Moreover, in Section~\ref{sect:mediapipe}, we  understand how \emph{MediaPipe} can aid us in detecting faces' location and their structures: MediaPipe  is an open-source project that provides a suite of libraries and tools for you to apply Artificial Intelligence and Machine Learning techniques in applications quickly.
+Finally, Section~\ref{section:vaegan}  summarizes current state-of-the-art approaches to deepfakes.
+
+
+
+\subsection{Generative Models}\label{sec:imggenmodels}
+\textbf{Generative models} are statistical models that contrast discriminative ones. 
+It is possible to affirm that generative models can generate \textbf{new data instances}, 
+in our case, images. 
+More formally, given a set of data instances $X$ and a set of labels $Y$, 
+generative models capture the joint probability $p(X, Y)$, or $p(X)$ if there are no labels. 
+The following sections  analyze the literature's four most common generative models: GANs, Variational Autoencoders, Flow-based models, and Diffusion models.
+
+
+\subsubsection{Generative Adversarial Networks (GAN)}\label{sec:gan}
+
+\begin{figure}[b]
+	\centering
+    \includegraphics[scale=0.8]{img/svg/GAN.png}
+	\caption{Overview of a GAN.}\label{fig:gan}
+\end{figure}
+
+\emph{Generative Adversarial Networks} (GAN) \cite{goodfellow2014generative} are generative models based on a game between two neural networks. 
+The first network, the \textbf{generator}, generates new data instances, given a noise or a conditioning variable (class label, text encoding). 
+The second network, the \textbf{discriminator}, evaluates the result of the first network against authentic images.
+The generator and the discriminator are trained simultaneously in an adversarial manner, hence the name GAN. An example of architecture is shown in Figure~\ref{fig:gan}, where $X$ represents the authentic data, $X'$ represents the generated data, $D(X)$ signifies the probability that the input $X$ is accurate, and $G(Z)$ denotes the generated data given a noise variable input $Z$~\cite{weng2019gan}.
+
+\subsubsection{Variational Autoencoders (VAE)}\label{sec:vae}
+
+\begin{figure}[t]
+	\centering
+    \includegraphics[scale=0.8]{img/svg/VAE.png}
+    \caption{Overview of VAE.}\label{fig:vae}
+\end{figure}
+
+\emph{Variational Autoencoders} (VAE)~\cite{kingma2022autoencoding} are generative models based on \textbf{variational inference}.
+To explain them, we first need to talk about \emph{Vanilla Autoencoders}.
+They use an \textbf{encoder} to reduce the input to a \textbf{latent space} of lower dimensionality, and then, the \textbf{decoder} reconstructs the input. 
+The autoencoder's latent space compresses the most relevant input features and is free of noise and redundant features.
+This model aims to minimize the distance between input and output. The encoder structures $Z$ (latent space) however it needs, as long as it is practical, but is not necessarily in a meaningful structure. 
+Moreover, this irregular, unbounded distribution makes it hard to sample random points.
+Instead, VAE solves this problem by introducing randomness and constraining the latent space to obtain a \textbf{meaningful structure}. 
+The variational encoder maps the input image into a \emph{multivariate normal distribution}, and with randomization, the encoder forces the latent space to be continuous. 
+The continuous nature of VAE's latent space allows for generating meaningful interpolations between images, and it also means that VAE \textbf{implicitly learns the data distribution}. In Figure~\ref{fig:vae}, we can observe the architecture of a VAE, where $X$ represents the input data, $q_\phi(Z|X)$ signifies the \textbf{encoder network} that maps $X$ to a distribution in the latent space $Z$, and $p_\theta(X|Z)$ represents the \textbf{decoder network} that maps $Z$ back to the data space $X'$.
+
+\subsubsection{Flow-based Models}\label{sec:flow}
+
+\begin{figure}[b]
+	\centering
+    \includegraphics[scale=0.8]{img/svg/FB.png}
+    \caption{Overview of a Flow-based Model.}\label{fig:flow}
+\end{figure}
+
+
+\emph{Flow-based models}~\cite{weng2018flow} are generative models based on \textbf{normalizing flows}, a powerful statistics tool for \textbf{density estimation}.
+\emph{Normalizing Flow} (\emph{NF})~\cite{rezende2016variational} models transform a simple distribution into a complex one by applying a \textbf{sequence of invertible transformation functions}. 
+A Flow-based model explicitly learns the data distribution $p(X)$; therefore, the loss function is simply the \emph{negative log-likelihood}.
+The main disadvantage of flow-based models is that their latent space is not lower-dimensional;  therefore, they do not allow data compression by default, making them \textbf{computationally expensive}. An example of the architecture is shown in Figure~\ref{fig:flow}, where $X$ represents the input data, $f$ is an invertible transformation function used to map $X$ to the latent representation $Z$, and $X'$ is the reconstructed data.  
+
+
+\subsubsection{Diffusion Models}\label{sec:diff}
+
+\begin{figure}[t]
+	\centering
+    \includegraphics[scale=0.8]{img/svg/DIFF.png}
+    \caption{Overview of a Diffusion Model.}\label{fig:diff-arch}
+\end{figure}
+
+
+Diffusion models are inspired by \emph{non-equilibrium thermodynamics}~\cite{V_n_2020}. 
+They define a \textbf{Markov chain} of diffusion steps to add \textbf{Gaussian noise} to data slowly and then learn to reverse the diffusion process to construct desired data samples from the noise~\cite{weng2021diffusion}. 
+In Figure~\ref{fig:diff-arch}, we can observe how the diffusion steps transform the original data represented with $X_0$ into pure isotropic Gaussian noise denoted as $Z$. 
+In the case of images, a diffusion model is composed of two processes:
+
+\begin{itemize}
+	\item A predefined \textbf{forward diffusion} process $q$ that gradually adds Gaussian noise to the image, where given an infinite amount of steps, will end up with pure isotropic Gaussian noise. 
+	\item A learned \textbf{reverse denoising diffusion} process $p_\theta$, where a neural network is trained to predict all the noise in an image and then is partially subtracted at each step.
+\end{itemize}
+
+In the following two paragraphs, we better detail these two processes.
+
+\paragraph{Forward Diffusion Process} Let $q(x_0)$ be the actual data distribution; then, we can sample from this distribution to get an image, $x_0 \sim q(x_0)$. 
+We define the forward distribution process $q(x_t|x_{t-1})$ which adds Gaussian noise at each time step $t$, 
+according to a known \textbf{variance schedule} $0<\beta_1<\beta_2<...<\beta_T<1$, where $\beta_t$ 
+is not constant (linear, quadratic, cosine) at each time step $t$,  as
+
+\begin{equation} \label{eq:forward}
+	q(x_t|x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta}x_{t-1}, \beta_t I)
+\end{equation}
+Given $\alpha_t:=1-\beta$ and the cumulative product of all $\alpha_t$ up to time step $t$ as 
+$\bar{\alpha_t} := \prod_{s=1}^t\alpha_s$, then, we can rewrite Equation~\ref{eq:forward} as \cite{weng2021diffusion}:
+
+\begin{equation}
+	\begin{split}
+		x_t & = \sqrt{1-\beta_t}x_{t-1} + \sqrt{\beta_t}\epsilon_{t-1}
+		\text{where $\epsilon_{t-1},\epsilon_{t-2},... \sim \mathcal{N}(0,I)$}\\
+		& = \sqrt{\alpha_t}x_{t-1} + \sqrt{1-\alpha_t}\epsilon_{t-1} \\
+		& = \sqrt{\alpha_t\alpha_{t-1}}x_{t-2} + \sqrt{1-\alpha_t\alpha_{t-1}}\bar{\epsilon}_{t-2} 
+		\text{where $\bar{\epsilon}_{t-2}$ merges two Gaussians}\\
+		& = ... \\
+		& = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon 
+	\end{split}
+\end{equation}
+
+In the original form, as
+
+\begin{equation} \label{eq:forward2}
+	q(x_t|x_{t-1}) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t}x_0, (1 -\bar{\alpha}_t) I)
+\end{equation}
+
+This makes it possible to sample $x_t$ at any arbitrary noise level conditioned on $x_0$,
+meaning that we don't need to apply $q$ repeatedly to sample $x_t$.
+
+
+
+\begin{figure}[b]
+	\centering
+	\includegraphics[scale=0.74, keepaspectratio]{img/background_img/Diffusion2.png}
+	\caption{Denoising in Reverse Diffusion PRocess.}\label{fig:m-chain}
+\end{figure}
+
+
+\paragraph{Reverse Diffusion Process} Knowing the \textbf{conditional distribution} $p(x_{t-1}|x_t)$, we could run the process in reverse by sampling some random Gaussian noise $x_T$ and then gradually denoise it so that we end up with a sample from the actual distribution $x_0$.
+Figure~\ref{fig:m-chain} shows an illustrative example of this concept. In this figure, an image of pure isotropic Gaussian noise, denoted as $x_T$, undergoes a gradual denoising process until it reaches the original image, represented as $x_0$.
+Nonetheless, the conditional distribution $p(x_{t-1}|x_t)$ is \textbf{intractable} since it requires knowing the distribution of all possible images to be calculated.
+Therefore, we must learn the distribution $p(x_{t-1}|x_t)$ by training a neural network to \textbf{predict the noise} at each time step $t$. Given the conditional distribution $p_\theta(x_{t-1}|x_t)$, 
+with $\theta$ being the parameters of the neural network, and assuming the reverse process is Gaussian as well, we can define the distribution by two parameters:
+
+\begin{itemize}
+	\item a \textbf{mean} parametrized by $\mu_\theta$,
+	\item a \textbf{variance} parametrized by $\Sigma_\theta$.
+\end{itemize}
+
+The \textbf{conditional distribution} is then defined as
+\begin{equation}
+	p_\theta(x_{t-1}|x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t,t), \Sigma_\theta(x_t,t))
+\end{equation}
+
+$\mu_\theta$ and $\Sigma_\theta$ are also conditioned on the noise level $t$.
+Given that the variance $\Sigma_\theta$ is fixed to a certain schedule: ``First, we set $\Sigma_\theta(x_t,t)=\sigma_t^2I$ to untrained time dependent constants. Experimentally, both $\sigma_t^2=\beta_t$ and $\sigma_t^2=\tilde{\beta_t}$ had similar results''~\cite{ho2020denoising}.
+
+The neural network solely needs to \textbf{learn the mean} $\mu_\theta$.
+The neural network was then improved in the \emph{Improved diffusion models} paper~\cite{nichol2021improved}, where it was trained to learn both the mean and the variance.
+The loss function would be the \textbf{negative log-likelihood} $-log(p_\theta(x_0))$. 
+However, since $p_\theta(x_0)$ is not nicely computable, as it depends on all the other time steps coming before  $x_0$ starting at $x_T$, we can instead use the \emph{Variational Lower Bound} (\emph{ELBO})~\cite{elbo} 
+to minimize the negative log-likelihood concerning ground truth data sample $x_0$.
+This is possible because the combination of $q$ and $p_\theta$ can be seen as a VAE.
+The ELBO for this process is defined as the \textbf{sum of losses} at each time step $t, L_0 + L_1 + \dots + L_T$.
+Each term of the loss, except for $L_0$, is the \emph{KL divergence between two Gaussian distributions},
+which can be written as a \textbf{Squared Error Loss} (L2-loss) concerning the means.
+Given that $\bar{\alpha_t}$ are functions of the known variance schedule $\beta_t$, they can be precomputed.
+
+Furthermore, by considering Equation~\ref{eq:forward2}, we can sample Gaussian noise, 
+scale it appropriately, and add it to $x_o$ to  get $x_t$ directly. This allows us
+to \textbf{optimize random terms of the loss function} $L$, meaning we can randomly sample $t$ during training and optimize $L_t$.
+
+We can also reparametrize the mean to make the neural network predict
+the added noise via a network $\epsilon_\theta(x_t,t)$ for noise level t in the KL terms, which
+constitute the losses, making the neural network a \textbf{noise predictor}.
+Then the mean is computed as \cite{weng2021diffusion}:
+
+\begin{equation}
+	\mu_\theta(x_t,t) =\frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t,t)\right)
+\end{equation}
+
+The \textbf{objective function} $L_t$, for a random time step $t$ and given $\epsilon \sim \mathcal{N}(0,I)$, will be:
+
+\begin{equation}
+	||\epsilon-\epsilon_\theta(x_t,t)||^2 = ||\epsilon - \epsilon_\theta
+	(\sqrt{\bar{\alpha}_t}x_0 + \sqrt{(1-\bar{\alpha}_t)}\epsilon,t) ||^2
+\end{equation}
+
+where $x_0$ is the initial image, $t$ is the direct noise level sample given by the
+forward process, $\epsilon$ is the pure noise sampled at time step $t$, and 
+$\epsilon_\theta(x_t,t)$ is the neural network. The neural network optimization is made possible 
+by using a simple \textbf{mean squared error} (MSE) between the true and the predicted Gaussian noise. Algorithm~\ref{alg:training} shows how to perform the training phase.
+
+\begin{algorithm}[t]
+    \caption{Training}\label{alg:training}
+    \begin{algorithmic}[1]
+    \Repeat
+        \State $\mathbf{x}_0 \sim q(\mathbf{x}_0)$
+        \State $t \sim$ Uniform$({1,\ldots,T})$
+        \State $\epsilon \sim \mathcal{N}(\mathbf{0},\mathbf{I})$ 
+        \State Take gradient descent on 
+        $\nabla_\theta||\epsilon - \epsilon_\theta
+	(\sqrt{\bar{\alpha}_t}\mathbf{x}_0 + \sqrt{(1-\bar{\alpha}_t)}\epsilon,t) ||^2$\Until{converged}
+    \end{algorithmic}
+\end{algorithm}
+
+
+
+
+\begin{figure}[t]
+	\centering
+    \includegraphics[scale=0.87]{img/svg/UNET.png}
+	\caption{U-net architecture.}\label{fig:unet}
+\end{figure}
+
+
+
+\paragraph{Conditioned U-Net} A \emph{U-Net} is a symmetric architecture that uses skip connections between encoder and decoder blocks of the same feature dimension and input and output with the same spatial size. A \emph{Conditioned-U-Net}~\cite{conditionedunet} adds a control mechanism to the standard U-Net.
+The neural network used to predict the noise is similar to \emph{U-net}~\cite{ronneberger2015unet} that takes as input a  \textbf{tensor} (an image) and outputs a noise tensor of the same size as the input one. The U-net, whose architecture is depicted in Figure~\ref{fig:unet}, is a \textbf{convolutional neural network}  composed of two parts: an encoder and a decoder, similar to an \textbf{autoencoder}.
+
+The encoder is a series of convolutional layers that progressively reduce the spatial resolution of the input image  into a smaller hidden representation called the \textbf{autoencoder}.
+Then, the decoder, which is a series of convolutional layers, progressively increases the spatial resolution back into an actual image. This architecture allows the network to learn only the \textbf{relevant features} of the input image. The downsampling and upsampling (please refer to the next paragraph)  stacks communicate through skip connections, improving gradient flow~\cite{he2015deep}. \emph{Sinusoidal positional embeddings} are used to encode $t$,  making the neural network understand at which time step is operating for every image.
+The network also uses \emph{global attention} in the lower dimensional layers to achieve a better performance.
+
+\paragraph{Sampling}
+The sampling process reverses the diffusion process, as defined in Algorithm~\ref{alg:sampling}. We start from $T$, where we sample pure noise from a Gaussian distribution, 
+and then use the trained neural network to denoise it gradually at each time step until we end up at time step $t=0$.
+Ideally, the algorithm will return an image coherent with the real data distribution.
+
+\begin{algorithm}[t]
+    \caption{Sampling}\label{alg:sampling}
+    \begin{algorithmic}[1]
+    \State $\mathbf{x}_T \sim \mathcal{N}(\mathbf{0},\mathbf{I})$
+    \For{$t=T,\ldots,1$}
+        \State $\mathbf{z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$ if $t >1$, else $\mathbf{z} =0$
+        \State $\mathbf{x}_{t-1} = \frac{1}{\sqrt{\alpha_t}}\left(\mathbf{x}_t - \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(\mathbf{x}_t,t)\right) + \sigma_t \mathbf{z}$
+    \EndFor
+    \State \textbf{return} $\mathbf{x}_0$
+    \end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+\subsection{Stable Diffusion}\label{sec:stable-diffusion}
+
+\emph{Stable Diffusion}~\cite{rombach2022highresolution} changes the diffusion model architecture by making 
+it a \emph{Latent Diffusion Model}. 
+The training and the sampling are done in the \textbf{latent space}, 
+a lower-dimensional image representation, giving the model a performance boost.
+Stable Diffusion also accepts \textbf{textual prompts} as a conditioning input, making it a \emph{text-guided diffusion model}.
+
+\begin{figure}[b]
+	\centering
+    \includegraphics[scale=0.9]{img/svg/SDArch.png}
+	\caption{The LDM architecture with the conditioning mechanism.}\label{fig:ldm-architecture}
+\end{figure}
+
+
+\paragraph{The architecture}\label{sec:ldm-architecture} 
+
+
+
+
+Figure~\ref{fig:ldm-architecture} shows the \textbf{architecture} of the Stable Diffusion model.
+The first element is a VAE that transforms the \textbf{pixel space} of the input tensor into a latent space that is  perceptually equivalent to the data space. The \emph{universal autoencoding stage} is trained before the DM,  making it reusable on multiple DM trainings. A \emph{Transformer language model} $\tau_\theta$ is used as the language understanding component  that takes the text prompt and produces \emph{token embeddings}. $\tau_\theta$ outputs 77 token embedding vectors, each in 768 dimensions. 
+The text representation is concatenated to the input tensor for diffusion. At the same time, all the generated tokens are mapped into the  U-Net via the \emph{multi-head Attention}(Q, K, V) layers. The model still uses multiple \textbf{skip connections} and time step embeddings,
+as in the pure Diffusion model.
+
+
+
+\paragraph{The Text Encoder}
+
+The \emph{Transformer language model} used as the language understanding component inside the LDM is \emph{ClipText}, based on the OpenAI CLIP model.\footnote{OpenAI CLIP: \url{https://openai.com/research/clip}.}
+CLIP stands for \textbf{Constastive Language-Image Pretraining} and is an open-source, multi-modal, zero-shot model. 
+Given an image and text description, the model can predict the most relevant text description for that image without 
+optimizing for a particular task.
+
+\begin{figure}[t]
+	\centering
+    \includegraphics[scale=0.85]{img/svg/Clip.png}
+	\caption{The training steps of CLIP.}\label{fig:clip-training}
+\end{figure}
+
+CLIP is trained on a 400 million image-text pairs dataset, and Figure~\ref{fig:clip-training} shows the training steps done for each 
+data pair.
+Firstly, each image and caption are encoded with an image and a text encoder. Then, using \emph{cosine similarity},  the two embeddings are compared to each other, giving a score that will be low at first. 
+The two models get updated until the resulting embeddings are similar. 
+After repeating these steps across the dataset with large batch sizes, the two encoders can produce \textbf{similar embeddings} 
+for the correct image-text pairs. It is essential to notice that during the training process, 
+the two models are also trained on \textbf{negative examples}, allowing the model to assign a low score to incorrect pairs.
+
+
+
+\paragraph{Classifier-free guidance}
+
+During \textbf{inference}, instead of using a CLIP-guided diffusion method, Stable Diffusion uses 
+\emph{classifier-free guidance}~\cite{ho2022classifierfree} that improves quality and decreases the sample diversity;  this method also helps to emphasize the prompt input during the diffusion process. 
+At each diffusion step, the model produces two images, one guided by text and one without access to the text.  The difference between the two images is computed, scaled by the \textbf{CFG scale}, and then added to the text-less image,  making the resulting image more faithful to the prompt. 
+In conclusion, the CFG scale controls how much the diffusion process will be coherent with the prompt so that a lower CFG value will result in an image of higher quality but less faithful. Conversely, a higher value will result in a more coherent image but more distorted.
+
+
+\paragraph{Training}
+
+The training process is similar to the one of the pure Diffusion model.
+However, in this case, the loss function uses the \textbf{latent data} $z_t=\sqrt{\bar{\alpha}_t}z_0 + \sqrt{1-\bar{\alpha}_t}\epsilon$ where $z_0 = E(x_0)$ is the latent representation of the input image $x_0$. In addition, the conditioning input $\tau_\theta(y)$ generated by the text encoder is also taken into account, resulting in the following loss function:
+
+\begin{equation}
+	L_{LDM} = \mathbb{E}_{t,z_0,\epsilon,y}\left[||\epsilon-\epsilon_\theta(z_t,t,\tau_\theta(y))||^2\right]
+\end{equation}
+
+
+
+\paragraph{Image to Image Diffusion}
+
+Stable Diffusion can also generate an image from an \textbf{initial one}. This process, defined in multiple applications  as ``\textbf{img2img diffusion}'', is done by applying \textbf{forward diffusion} to the input image for a certain amount of steps and then running the \textbf{backward diffusion} process on the noisy image until the model recovers a new one. A \textbf{noise strength} parameter  from 0.0 to 1.0 corresponds to the percentage of each noise step added to the initial image. 
+A higher parameter value will cause the diffusion process to deviate more from the original image, resulting in one with additional new details. A lower noise strength value will cause the diffused image to be almost identical to the input one.
+
+
+
+\subsection{ControlNet}\label{sect:controlnet}
+
+\emph{ControlNet}~\cite{zhang2023adding} is a neural network architecture that can enhance  pre-trained image diffusion models with task-specific conditions.  The model manipulates the input conditions of network blocks to control the overall behavior of an entire neural network.
+
+\begin{figure}[b]
+	\centering
+    \includegraphics[scale=0.8]{img/svg/Controlnet1.png}
+	\caption{Application of ControlNet to an arbitrary neural network block.}\label{fig:controlnet}
+\end{figure}
+
+
+Figure~\ref{fig:controlnet}-(a) shows an arbitrary \textbf{neural network block} $\mathcal{F}(\cdot;\Theta)$,  with a set of parameters $\Theta$, where, for example, a \textbf{feature map} $x \in \mathbb{R}^{h\times w \times c}$, with ${h,w,c}$  being height, width, and channel numbers is transformed into another feature map $y$ with
+
+\begin{equation}
+	y = \mathcal{F}(x;\Theta).
+\end{equation}
+
+Figure~\ref{fig:controlnet}-(b) shows how a ControlNet is applied to a neural network block.
+All $\Theta$ parameters are locked and then cloned to a \textbf{trainable copy} $\Theta_c$, 
+which is trained with an \textbf{external condition vector} $c$.  This copy is created to avoid overfitting when the training dataset is small  and to preserve the quality of large models. 
+
+Finally, the two neural network blocks are connected via a \emph{zero convolution layer},  a $1\times1$ convolution layer with both weight and bias initialized as zeros. By denoting the zero convolution operation as $\mathcal{Z}(\cdot;\cdot)$ and using two instances of parameters ${\Theta_{z1},\Theta_{z2}}$, we can compose the ControlNet structure with
+
+\begin{equation}
+	y_c = \mathcal{F}(x;\Theta) + \mathcal{Z}(\mathcal{F}(x+\mathcal{Z}(c;\Theta_{z1});\Theta_c);\Theta_{z2}),
+\end{equation}
+
+\noindent where $y_c$ is the output of the ControlNet block. Thanks to the zero convolution layers, when ControlNet is applied to some neural network blocks,  it will not cause any changes to the deep neural features before optimization, resulting in $y=y_c$.
+Next, the paper's authors show how having a zero convolution layer does not influence the weight 
+and bias gradients as long as the condition vectors are non-zero, but the datasets ensure this.
+``In this way, the zero convolutions become a unique type of connection layer that progressively grows from zeros to
+optimized parameters in a learned way''~\cite{zhang2023adding}.
+
+\begin{figure}[t]
+	\centering
+    \includegraphics[scale=0.8]{img/svg/Controlnet2.png}
+	\caption{Application of ControlNet to Stable Diffusion architecture.}\label{fig:controlnet-2}
+\end{figure}
+
+
+As shown in Figure~\ref{fig:controlnet-2}, ControlNet controls each level of the Stable Diffusion U-Net in a \textbf{computationally efficient} way due to the locked weights of the diffusion model, so no gradient computation on the original encoder is needed for training. 
+ControlNet generates a trainable copy of the $12$ encoding blocks and $1$ middle block of Stable Diffusion. The $12$ blocks are in $4$ resolutions ($64 \times 64$, $32 \times 32$, $16 \times 16$, $8 \times 8$) with each having $3$ blocks. The outputs are added to the $12$ skip-connections and $1$ middle block of the U-net. With this method, the overall learning objective becomes:
+
+\begin{equation}
+	L = \mathbb{E}_{z_0,t,c_t,c_f,\epsilon \sim \mathcal{N}(0,1)}\left[||\epsilon-\epsilon_\theta(z_t,t,c_t,c_f)||^2 \right]
+\end{equation}
+
+\noindent where $c_t$ are the text prompts and $c_f$ are task-specific conditions. These are all the types of conditioning available with ControlNet: Canny Edge, Hough Line, HED boundary, User Sketching, Human Pose (Openpose\footnote{The GitHub repository of Openpose: \url{https://github.com/CMU-Perceptual-Computing-Lab/openpose}.}), Semantic Segmentation, Depth, Normal Maps, Cartoon Line Drawing.
+
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.8]{img/background_img/ControlnetDemo.png}
+	\caption{Controlling Stable Diffusion with Canny edges (one of the painting titles is ``La Belle Ferronni{\`e}re'' by Leonardo da Vinci).}
+	\label{fig:canny}
+\end{figure}
+
+Figure~\ref{fig:canny} shows how the \textbf{Canny Edge Conditioning} can control the diffusion process.
+This leads to the creation of novel images retaining the same underlying structure while exhibiting diverse styles and subjects.
+ControlNet enhances the preservation of important \textbf{structural features} during the diffusion process, producing visually compelling and contextually rich variations, resulting in new images with the same structure but different styles and subjects.
+
+
+
+\subsection{LoRA (Low-Rank Adaptation)}\label{sect:lora}
+
+\emph{LoRA} \cite{hu2021lora} is a method that was firstly developed to adapt 
+\emph{Large Language Models} (LLMs) to particular tasks or domains.
+``This method freezes  the pre-trained model weights and injects \textbf{trainable rank decomposition matrices}  into each layer of the Transformer architecture, greatly reducing the number of trainable 
+parameters for downstream tasks''~\cite{hu2021lora}.
+
+Some users started to use LoRA as an alternative to \emph{Dreembooth}~\cite{ruiz2022dreambooth}, and \emph{textural inversion}~\cite{gal2022image} to  fine-tune the Stable diffusion model. LoRA has some advantages over the other two techniques, resulting in small model files ($2$-$200$MBs), smaller than Dreembooth,  while keeping an optimal result during diffusion. However, like textual inversion, a LoRA model must be used with a \textbf{SD model checkpoint file}. In This case, LoRA applies small changes to the \textbf{cross-attention layers} by adding its  weights to their weights matrices. LoRA achieves a smaller file size by breaking its weight matrix into \textbf{two low-rank matrices}.
+
+
+\begin{figure}[t]
+	\centering
+    \includegraphics[scale=0.62]{img/svg/LoRA.png}
+	\caption{LoRA reparametrazation.}\label{fig:lora}
+\end{figure}
+
+
+Figure~\ref{fig:lora} shows the LoRA reparametrization technique. Let us consider a  pre-trained weight matrix $W_0 \in \mathbb{R}^{d\times k}$, we can constrain its update by representing it as a \textbf{low-rank decomposition} $W_0 = \Delta W=W_0+BA$, where $B \in \mathbb{R}^{d \times r}$, $A= \in \mathbb{R}^{r \times k}$, and the rank $r \ll min(d,k)$.
+
+$W_0$ is frozen during training, while $A$ and $B$ are trainable parameters.
+For $h = W_0x$, the forward pass yields:
+
+\begin{equation}
+	h = W_0x + \Delta Wx = W_0x + BAx
+\end{equation}
+$A$ is initialized to a random Gaussian and $B$ is initialized to zero, so that
+$\Delta W = BA$ is zero.
+
+
+
+\subsection{MediaPipe}\label{sect:mediapipe}
+
+\emph{MediaPipe}\footnote{MediaPipe Web page: \url{https://mediapipe.dev/}.}  is an open-source framework for building pipelines to perform computer vision  inference over arbitrary sensory data such as video or audio. MediaPipe offers the following solutions:
+Face Detection, Face Mesh,  Iris Detection, Hands Detection, Pose Detection, Holistic, Selfie Segmentation, Hair Segmentation, Object Detection, Box Tracking, Instant Motion Tracking, Objectron (3D), KNIFT, AutoFlip, MediaSequence, YouTube 8M. This project will focus on the \emph{Face Detection} and \emph{Face Mesh} solutions described in the following paragraphs.
+
+\paragraph{Face Detection}
+
+
+\emph{Face Detection} is a MediaPipe solution that \textbf{detects human faces} in an image or a video,
+with six landmarks and multi-face support.
+It is based on \emph{BlazeFace} \cite{bazarevsky2019blazeface}, a lightweight and well-performing 
+face detector tailored for mobile GPU inference.
+In Figure~\ref{fig:MediapipeDemo}, we can see how the BlazeFace pipeline can detect a face, defined by the red bounding box, while the six green dots represent the detected landmarks.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.65, keepaspectratio]{img/background_img/MediapipeDemo.png}
+	\caption{Example of Face Detection and Face Mesh.}\label{fig:MediapipeDemo}
+\end{figure}
+
+
+\paragraph{Face Mesh}
+\emph{Face Mesh} is a MediaPipe solution that estimates \textbf{468 3D face landmarks} in an image or a video by using machine learning to infer the \textbf{3d facial surface} without needing a dedicated depth sensor.
+This ML pipeline consists of two real-time deep neural networks that work together.
+The first one is a \textbf{detector} based on \emph{BlazeFace} that computes face locations on the full image.
+The second is a \emph{3D face landmark model} \cite{kartynnik2019realtime} that operates on those locations and predicts the 
+approximate 3D surface via regression. In Figure~\ref{fig:MediapipeDemo}, we can observe a representation of the output.
+
+
+\subsection{The Two Main Approaches to Generate Deepfakes in the Literature}\label{section:vaegan}
+In Section~\ref{sec:deep-vae} and Section~\ref{sect:vaegan}, we describe two key approaches to generate deepfakes: respectively, deepfakes generated with Autoencoders and Variational Autoencoders, and deepfakes generated with VAE/GAN.
+
+\subsubsection{Deepfakes with Autoencoders (AE) and Variational Autoencoders (VAE)}\label{sec:deep-vae}
+
+We already introduced \emph{Autoencoders}~\cite{bank2021autoencoders} in Section \ref{sec:vae}, but here we will go into further detail  about how they can be used to create deepfakes. Their training is based on learning the functions $A : \mathbb{R}^n \rightarrow \mathbb{R}^p$ (encoder), 
+and $B:\mathbb{R}^p \rightarrow \mathbb{R}^n$ (decoder), where both satisfy:
+
+\begin{equation}
+	arg~min_{A,B}E[\Delta(x,B \circ A(x))]
+\end{equation}
+
+\noindent where $E$ is the expectation over the distribution of $x$ and $\Delta$ is the reconstruction loss function (generally $L_2$-norm), which measures the distance between the output of the decoder and the input.
+
+
+
+\begin{figure}[t]
+	\centering
+    \includegraphics[scale=0.6, keepaspectratio]{img/background_img/Training-AE.png}
+    \caption{Decoder training.}\label{fig:training-ae}
+	\includegraphics[scale=0.6, keepaspectratio]{img/background_img/Generation-AE2.png}
+	\caption{Generation of deepfakes.}\label{fig:generation-ae}
+\end{figure}
+
+
+This architecture commonly uses \textbf{multiple hidden layers} between the encoder and the decoder with fewer neurons than the number of input image pixels, creating a latent image representation. 
+The generation of deepfakes with AE consists of three significant steps.
+First, an encoder is trained to produce feature maps for \textbf{both faces class}, while a decoder is trained as a \textbf{measure of encoder accuracy}. 
+
+Then, as shown in Figure~\ref{fig:training-ae}, \textbf{two decoders are trained} separately to reproduce images from both classes. Finally, \textbf{decoders are switched} to produce images from one category based on feature maps from the other, illustrated in Figure~\ref{fig:generation-ae}. This same method can be applied to generate deepfakes with VAE (Section~\ref{sec:vae}), the only difference being \textbf{how the latent vector is obtained}.
+
+
+
+\subsubsection{Deepfakes with VAE/GAN}\label{sect:vaegan}
+
+\begin{figure}[b]
+	\centering
+    \includegraphics[scale=0.75]{img/svg/VaeGan.png}
+	\caption{VAE/GAN network.}\label{fig:vae-gan}
+\end{figure}
+
+
+\emph{VAE/GAN}~\cite{larsen2016autoencoding} is a combination of \emph{Variational Autoencoders} and \emph{Generative Adversarial Networks} that leverages learned representations to measure similarities in data space better. Figure~\ref{fig:vae-gan} shows how it is possible to combine a VAE with a GAN by \textbf{collapsing} the VAE decoder and the GAN generator  into one and then letting them share parameters and training them jointly.
+This unsupervised generative model simultaneously learns to encode, generate, and compare dataset samples. 
+The method used to create deepfakes is similar to the one explained in Section~\ref{sec:deep-vae} while achieving  better results by leveraging the GAN discriminator.
+
+
+
+\section{Our Approach} \label{ch:project}
+
+In this section, we will see how all the technologies presented in the previous  section can be used to create an application to generate deepfakes through Stable Diffusion.  Starting from how the input video needs to be processed.  We will then understand how we can use LoRA and Stable Diffusion with ControlNet to  generate images of a target subject and how these images can be applied to the input video, 
+creating a real deepfake.  Finally, we will understand the problems of this process and how they can be improved. We developed our project code in Python; the repository is freely available online.\footnote{The GitHub repository of our  implementation: \url{https://github.com/edoardotavassi/SCL_deepfake}.} The created deepfake aims to replace the face of one author of this paper (Edoardo Tavassi, top of  Figure~\ref{fig:training-ae}) with the face of another author (Francesco Santini, bottom of  Figure~\ref{fig:training-ae}).
+
+
+
+\subsection{Infographic}\label{sec:project_info}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.65]{img/svg/Info.png}
+	\caption{Pipeline of the deepfake generation procedure.}\label{fig:project}
+\end{figure}
+
+
+
+
+In Figure~\ref{fig:project}, we can see the entire \textbf{pipeline} used to create deepfakes from a video source. 
+First, the input video is decreased to $12$ frames per second. Then, for every frame, by using \emph{MediaPipe}, we can extrapolate face locations and their structure.  Next, the structure created with \emph{Face Mesh} is processed to generate a mask for the latter application of the diffused image, 
+while the locations detected by \emph{Face Detection} are used to extract just the face. After this, every cropped image is processed through \emph{Stable Diffusion} with \emph{ControlNet} and \emph{LoRA}. 
+
+This LoRA model was previously trained to the target face in a process that will be further explained in Section \ref{sec:lora_training_webui}.  Finally, every diffused image gets applied to the corresponding input frame and then exported as a video. In the following sections, we will elaborate on every step of this process. 
+
+
+
+\subsection{Video Preprocessing} \label{sec:video_preprocessing}
+
+In Section~\ref{sec:decreasing_frame_rate}, we will understand how to optimally prepare a video to improve the \textbf{processing efficency} and ensure almost \textbf{smooth video playback}. This process involves frame rate reduction, and we will see how to achieve it.
+In Section ~\ref{sec:face_detection}, we will focus on automating the cropping of the face to maintain \textbf{consistency} during subsequent processing tasks and minimizing computational requirements. Additionally, we will generate a face mask using a face landmark detection algorithm, followed by operations to smooth the mask's boundaries and ensure \textbf{seamless integration} with the processed frames.
+
+
+
+\subsubsection{Decreasing Frame Rate}\label{sec:decreasing_frame_rate}
+
+The first step of the \textbf{preprocessing pipeline} is decreasing the frame rate to \textbf{12 FPS} (see Figure~\ref{fig:project}). 
+This processing saves time later during the diffusion phase, having fewer frames to work on. 
+Twelve frames per second is the frame rate used in all major animation studios to ensure the minimum number of  frames while maintaining fluidity in a video. The Python interface to \emph{OpenCV}\footnote{OpenCV website: \url{https://opencv.org/}.} 
+was used to achieve this goal.  First, a function called ``\textbf{get-saving-frames-durations}'' returns the list of durations where to save the frames; this is done by creating a list of evenly spaced time points from $t=0$ to the end of the video, with a step of $1/12$. 
+
+After this, the primary function extracts the earliest saving time from the list of durations; 
+If this one is less than or equal to the current frame duration, calculated by dividing the frame counter by the original FPS,  then the current frame gets saved, and the frame counter increases. This iterative process stops when the list of durations is empty, resulting in the desired frame rate. In Figure~\ref{fig:init-frame}, we can see an example of a frame from the input video. This frame will be used as a base for all the following examples.
+
+
+
+\subsubsection{Face Detection and Face Mesh}\label{sec:face_detection}
+
+
+
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[width=3.6cm, keepaspectratio]{img/project_img/init.png}
+		\caption{Example of an input frame.}\label{fig:init-frame}
+	\end{subfigure}%
+	\hfill
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[width=3.5cm, keepaspectratio]{img/project_img/cropped.png}
+		\caption{Cropped frame.}\label{fig:cropped}
+	\end{subfigure}%
+	\caption{Outputs from MediaPipe preprocessing.}\label{fig:project-mediapipe}
+\end{figure}
+
+
+
+The next step is to crop just the face.  This decision is to help Stable Diffusion stay \textbf{consistent} through every frame during diffusion since the noise added is the same,  resulting in a similar output for each frame (\textbf{the seed is locked}).  In addition, the decrease in image size also helps reduce the time needed for diffusion. 
+To achieve this result, in Figure~\ref{fig:project} we use \emph{MediaPipe Face Detection} that, given an input frame,  returns a \textbf{proto message} that contains a \textbf{bounding box} and \textbf{six key points} (right eye, left eye, nose tip, mouth center, right ear tragion, and left ear tragion). 
+The bounding box is composed of $xmin$ and $width$ by $ymin$ and $height$, all normalized to $[0.0, 1.0]$. 
+At the same time, each key point is composed of $x$ and $y$, which are also normalized to $[0.0, 1.0]$ by the image width and height, respectively. 
+
+\FloatBarrier
+
+Since the bounding box is right on the face, a \textbf{padding of 30 pixels} was added to ensure a full face capture. Then, all the bounding box points get saved to a \emph{PKL file} for later use.  Figure~\ref{fig:cropped} shows an example of a cropped frame. After cropping, all the images are resized to $512 \times 512$ to ensure further \textbf{coherence} during diffusion.  The next step is to compute the face mask.  In Figure~\ref{fig:project}, this is done through \emph{MediPipe Face Mesh} that, given an input frame, returns a list of \textbf{468 face landmarks}  where each landmark is composed of $x$, $y$, and $z$, all normalized to  $[0.0, 1.0]$.  Next, we must find the \emph{convex hull} of all the returned landmarks to locate the face mask points, considering only the $x$ and $y$ coordinates. 
+This was done with \emph{Graham's scan algorithm} \cite{GRAHAM1972132} that works in $O(n log n)$ time. Let us consider an array of $n$ points:
+
+
+
+\begin{enumerate}
+	\item Find the point with the lowest $y$ coordinate, breaking ties by choosing the point with the lowest $x$ coordinate. 
+	Let this point be $P_0$. Put $P_0$ at the first position in the output hull.
+	\item Consider the remaining $n-1$ points and sort them by the polar angle in counter-clockwise order around $P_0$.
+	\item Check if two or more points have the same polar angle. If so, remove all except the one farthest from $P_0$. 
+	Let the size of the remaining set of points be $m$.
+	\item If $m \leq 2$, the algorithm terminates; the convex hull is not possible.
+	\item Create an empty stack $S$ and push $P_0$, $P_1$, and $P_2$ to it.
+	\item Process the remaining $m-3$ points one at a time, starting from $P_3$. by doing:
+	\begin{enumerate}
+		\item Keep removing points from $S$ while the orientation of the topmost point, next-to-top point, and current point is not counter-clockwise.
+		\item Push the current point to $S$.
+	\end{enumerate}
+	\item The points in $S$ are the output convex hull.
+\end{enumerate}
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[width=3.5cm, keepaspectratio]{img/project_img/mask.png}
+		\caption{Mask without processing.}\label{fig:mask-noblur}
+	\end{subfigure}%
+	\hfill
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[width=3.5cm, keepaspectratio]{img/project_img/final-erorr.png}
+		\caption{The output with the same mask.}\label{fig:mask-final-error}
+	\end{subfigure}
+ \\ \vspace{0.4cm}
+ 	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[width=3.5cm, keepaspectratio]{img/project_img/mask-blur.png}
+		\caption{Face mask.}\label{fig:mask}
+	\end{subfigure}
+ \caption{Mask and its application without processing.}\label{fig:eroor-mediapipe}
+\end{figure}
+
+
+After finding the convex hull, we can draw a white polygon on a black background corresponding to the \textbf{face mask},  and an example can be seen in Figure~\ref{fig:mask-noblur}. 
+This image can be used to do \emph{soft masking} of the diffused image by making transparent all  pixels corresponding to a black pixel on the mask.  Applying this mask would result in a \textbf{detectable compositing} due to the straight borders, 
+as shown in Figure~\ref{fig:mask-final-error}.  To solve this problem, we need to smooth all the borders of the mask.  This was done through multiple steps of \textbf{erosion} and \textbf{Gaussian blur}, 
+resulting in a mask with smooth borders that can be seen in Figure~\ref{fig:mask}.
+
+
+
+\subsection{Stable Diffusion WebUI} \label{sec:stable_diffusion_webui}
+
+A browser interface based on \emph{Gradio library}\footnote{Gradio website: \url{https://gradio.app/}.} 
+created by AUTOMATIC1111\footnote{Stable Diffusion WebUI Github: \url{https://github.com/AUTOMATIC1111/stable-diffusion-webui}.} 
+was used to operate Stable Diffusion. 
+This interface offers all Stable Diffusion modules optimized for \textbf{lower VRAM usage}, down to 2GB. 
+The software creates a \textbf{local server on port $7860$} and,  using the \emph{Xformers library}\footnote{Xformers Github: \url{https://github.com/facebookresearch/xformers}.} further speeds up the image generation process on an Nvidia RTX 3070 Ti with 8GB of VRAM.
+
+One of the most interesting parts is that this software offers an extension module to  implement ControlNet and LoRA models with just a click.  To call a LoRA model for diffusion, we need to write ``\textbf{<lora:ModelName:$\alpha$>}'' in the prompt,
+where ModelName is the name of the model file without the extension,  and $\alpha$ is the weight applied to the LoRA model that goes from $0$ to $1$ (with $0$ the model is disabled). 
+
+Given that the application developed for this project is standalone,  we need a way to communicate with the web UI (in Figure~\ref{fig:project}). We can use the \emph{API} the local server offers for this.
+We can communicate with the Stable Diffusion web UI through simple 
+POST and GET requests through an \textbf{HTTP communication}. 
+
+
+
+The JSON payload used for diffusion comprises several elements (see Figure~\ref{fig:jsonpayload}).
+First, we have an array of images to diffuse (in our case, just one image), 
+where each image is encoded to \textbf{Base64}. 
+Then, we have the conditioning parameters, \textbf{prompt} and \textbf{negative prompt}, 
+that tell Stable Diffusion what and what not to generate during diffusion. 
+The \textbf{steps} represent the number of diffusion steps needed, while \textbf{width} 
+and \textbf{height} are the dimensions of the output image. 
+The \textbf{seed} parameter is used for the Gaussian noise and is generally fixed to the same value. 
+The \textbf{CFG scale} is used for \emph{Classifier-free guidance} during diffusion, 
+and the denoising strength tells Stable Diffusion how much noise to put on the input image. 
+The \textbf{sampler index} indicated which sampler to use; in our case, ``Euler a'', 
+which is the one that gave better results during testing.
+Ultimately, the \textbf{controlnet units} represent which preprocessing module and model to use with ControlNet.
+This payload is then sent to ``\textbf{127.0.0.1:7860/controlnet/img2img}'' for processing. 
+The \textbf{response} is composed of two images: the first one is the image generated with Stable Diffusion, 
+and the second one is the result of the ControlNet canny preprocessing of the input image.
+
+\begin{figure}
+\begin{python}
+	payload = {
+		"init_images": [
+		b64_img(image)
+		],
+		"prompt": prompt,
+		"negative_prompt": negative_prompt,
+		"steps": steps,
+		"width": image.width,
+		"height": image.height,
+		"seed": seed,
+		"cfg_scale": cfg_scale,
+		"denoising_strength": denoising_strength,
+		"sampler_index": "Euler a",
+		"controlnet_units":[
+		{
+			"module": "canny",
+			"model": "control_canny-fp16 [e3fe7712]",
+		}
+		]
+	}
+\end{python}
+\caption{The JSON payload used during diffusion.}\label{fig:jsonpayload}
+\end{figure}
+
+
+\subsection{LoRA Training WebUI} \label{sec:lora_training_webui}
+
+\begin{figure*}[H]
+	\centering
+	\includegraphics[width=15cm, keepaspectratio]{img/project_img/lora.png} 
+	\caption{LoRA training webUI.}
+	\label{fig:lora-webui}
+\end{figure*}
+
+To train a LoRA model (right side of Figure~\ref{fig:project}), a \emph{Windows-focused Gradio GUI}\footnote{Kohya WebUI Github: \url{https://github.com/bmaltais/kohya_ss}.} for \emph{Kohya's Stable Diffusion trainers}\footnote{Kohya ss scripts Github: \url{https://github.com/kohya-ss/sd-scripts}.} was used. 
+The GUI allows us to set the training parameters and run the required 
+CLI commands to train the model with just \textbf{7GB of VRAM}. 
+The first step is to prepare the dataset. For this purpose, 
+a video of the target subject doing \textbf{multiple facial expressions} in \textbf{different lighting conditions} 
+is required. In our case, a 2-minute video of one of the authors(Francesco Santini) was recorded with a phone. 
+The 60 FPS video was then lowered to \textbf{30 FPS}, and with \emph{MediaPipe Face Detection},
+the face was extracted from all the frames in the same way proposed in Section \ref{sec:face_detection}.
+Having the model trained on a dataset of $512\times 512$ images similar to the input images 
+of the diffusion process helps us achieve a more consistent result. 
+Then, we need to eliminate all the blurred images from the dataset. 
+To perform \emph{blur detection}, we can use the \emph{variance of the Laplacian} \cite{903548}. 
+This  method can be implemented  with the help of OpenCV. 
+First, we convolve a single channel of the input image with the \emph{Laplacian kernel}:
+
+\begin{equation}
+	\begin{bmatrix}
+		0 & 1 & 0\\
+		1 & -4 & 1\\
+		0 & 1 & 0
+	\end{bmatrix}
+\end{equation}
+
+Furthermore, we take the response's variance (i.e., standard deviation squared) 
+and compare it to a \textbf{predefined threshold}; if it falls below, the image is blurry; otherwise, it is not.
+The Laplacian operator is generally used to measure the second derivative of an image, 
+highlighting regions containing rapid intensity changes. 
+We can affirm that if the image contains a high variance, there are widespread responses, 
+representing an in-focus image. On the other hand, a  low variance represents a small spread of answers, 
+indicating few and small edges, a clear sign of blur.
+Now that we have eliminated all the blurry images, 
+we must pair each frame with a textual description before training. 
+We do not want to do this process by hand for all the datasets. 
+Instead, we can use \emph{Bootstrapping Language-Image Pre-training} (BLIP) captioning \cite{li2022blip} 
+to generate all the captions for us. 
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.3, keepaspectratio]{img/project_img/santini-training.png}
+	\caption{Sample from the training dataset.}
+	\label{fig:santini-training}
+\end{figure}
+
+
+We take as an example Figure~\ref{fig:santini-training}: BLIP captioning generates the following caption where we add the name of our target subject as an \textbf{identifier} at the start: ``Francesco Santini a bald man with a beard and a black shirt''.
+
+We are now ready to start the training process.  First, all the parameters for training are set with a JSON file generated by the main application (further explained in Section~\ref{sec:gui}), so we need to press a button. The training, for a small dataset of around a thousand images, 
+takes about $4$ hours on a machine with an Nvidia RTX 3070 Ti with $8$GB of VRAM.  The result is a $200$Mb \emph{SafeTensors file} (our model) that needs to be added to the Stable Diffusion web UI and is now ready for diffusion.
+
+\subsubsection{Custom Light}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.25, keepaspectratio]{img/project_img/light.jpeg}
+	\caption{Our custom light.}
+	\label{fig:light}
+\end{figure}
+
+As said before, during the creation of the training dataset, we need to have multiple 
+light conditions for our target subject. 
+Therefore, a custom light was developed to obtain this result in a controlled way. This light, shown in Figure~\ref{fig:light}, is constructed with recycled materials. The external wood frame comprises two picture frames fixed with nails to ensure stability.  In addition, one glass plate is used as an insulator to separate the LEDs from the aluminum refractor. The other plate, modified with two layers of plastic light diffusers,  decreases the light intensity, making it a \textbf{soft light}.
+The handle is part of a pipe clamp glued on top to make the light easier to hold.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.55, keepaspectratio]{img/project_img/circuit-light.png}
+	\caption{The circuit.}
+	\label{fig:light-circuit}
+\end{figure}
+
+
+
+
+
+The light is generated by an array of 100 RGB LEDs (WS2812B) that need a 5V, 50W external power supply. 
+The circuit is shown in Figure~\ref{fig:light-circuit} and helps us to understand how the light works. 
+
+First, an \emph{Arduino Nano}\footnote{Arduino Nano documentation: \url{https://docs.arduino.cc/hardware/nano}.} controls all the logic and has its power supply.  Next, the board is connected via a digital pin to the LED strip and is protected  from \textbf{signals reflections} by a $330\Omega$ resistor. A $500 \mu F$ capacitor is used on the LED powerline to help provide current 
+while the power supply adjusts to the \textbf{varying load demands}. Since we also need a signal return for the LED data pin, the board's ground was  connected to the power supply's ground. 
+
+Finally, two buttons and one potentiometer are connected to the Arduino Nano to give tactile control over the light.  The potentiometer controls the intensity of the light, while the two buttons give us access to a menu. The first button cycles through two states, ``\textbf{static light mode}'' and ``\textbf{light cycle mode}''.  With static light, we get a fixed color that can be changed with the second button. Instead, with the light cycle mode, we get a perpetually changing color, where the second button controls how fast the cycle is.
+
+
+
+\subsection{Image Generation}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.92\textwidth, keepaspectratio]{img/project_img/grid-santini.png}
+	\caption{Effects of Denoising and weight of a LoRA model on diffusion.}
+	\label{fig:grid-santini}
+\end{figure}
+
+
+As seen in Section~\ref{sec:stable_diffusion_webui}, the image generation process is done through 
+a local server running Stable Diffusion.  It takes about \textbf{15 seconds} for each $512 \times 512$ image.  The main software offers the possibility to test the different parameters  on just one image and, when ready, apply them to all the images.  These parameters define how the process is going to happen.
+First, we have the \textbf{prompt} that needs to describe what face we want, or in the case of LoRA, 
+which model to use.
+Then, a \textbf{negative prompt} is used to further condition the diffusion by  describing what we do not want to see in the final image. 
+
+For example, the negative prompt in our case was: ``Distorted eyes, distorted mouth, distorted face, blue eyes, distorted teeth''. The number of \textbf{diffusion steps} will result in a less detailed image with lower values and  a more detailed image with higher values. 
+
+It is essential to notice that many steps will result in the model ``hallucinating'' too many details, distorting the final image. In Figure~\ref{fig:grid-santini}, we can see how the \textbf{denoising strength} (on the left) and the \textbf{$\alpha$ parameter} (on top) of the LoRA model affect the diffusion. 
+
+The denoising strength describes how much the final image will resemble the original one, while $\alpha$ indicates the weight of the LoRA model. Of course, there are no correct values to use, but through testing, a denoising strength of $0.4$ and an $\alpha$ of $1$ were optimal for deepfake generation when a LoRA model is used. 
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\textwidth, keepaspectratio]{img/project_img/cfg-examples.png}
+	\caption{How the CFG scale affects the image generation (towards Hollywood movie actor Leonardo DiCaprio).}
+	\label{fig:cfg-examples}
+\end{figure}
+
+If we did not use a LoRA model and instead a pure Stable Diffusion model, 
+it is crucial to consider the \textbf{CFG scale}. 
+This parameter indicates how much the diffusion process will adhere to the prompt.  For example, in Figure~\ref{fig:cfg-examples}, we can see how it affects the final image.  Like the number of steps, a higher value will result in a distorted output. However, a lower value will not affect the original image, resulting in an almost identical output. Through testing, the optimal CFG scale value was around $7$.
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[scale=0.2]{img/project_img/canny.png}
+		\caption{Correct canny.}\label{fig:canny-project}
+	\end{subfigure}%
+	\hfill
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[scale=0.2]{img/project_img/canny-error.png}
+		\caption{Incorrect canny.}\label{fig:canny-error}
+	\end{subfigure}
+	\caption{Examples of canny preprocessing.}\label{fig:canny-examples}
+\end{figure}
+
+
+The final thing to consider is the \textbf{ControlNet canny preprocessing}. 
+The canny pre-processing is controlled through a low threshold and a high threshold. 
+Unfortunately, when writing this paper, there are no ways of  controlling these two through the API.
+In this case, we aim to obtain an image similar to Figure~\ref{fig:canny-project},  where essential parts like mouth, nose shape, and eyes are highlighted without too many details. 
+
+Furthermore, this image will produce an optimal and consistent generation through each frame, further helping to resolve the non-deterministic behavior of Stable Diffusion. Differently, an image similar to Figure~\ref{fig:canny-error} will have too many details to be computed, 
+resulting in a distorted output.
+
+
+
+\subsection{Deepfake and Video}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.15, keepaspectratio]{img/project_img/output.png}
+	\caption{Example of an output frame.}
+	\label{fig:output}
+\end{figure}
+
+The final step of this process is to apply the diffused images to the initial frames and then create the final video. 
+To complete this process, the software cycles through all the \textbf{diffused images}  and finds the corresponding \textbf{initial frame} and \textbf{mask} for each one. 
+Then, to find where to apply them, the software utilizes the \emph{PKL file} containing all the original bounding box sizes and locations.  First, the image gets resized to its original size and then pasted  to its correct position on the initial frame with its mask. 
+An example of a final frame can be seen in Figure~\ref{fig:output}.
+Ultimately, all the final frames get united into a single \textbf{12 FPS AVI file} with the help of OpenCV. A video summarizing all the main steps of the generation pipeline can be found on YouTube.\footnote{A video showing the initial frames, the result of Stable Diffusion, the application of the mask on the face, and the final result: \url{https://www.youtube.com/shorts/OcuALrcSxfc}.}
+
+
+
+\subsection{GUI}\label{sec:gui}
+
+The GUI of our deepfake generation application was developed with \emph{PyQt6}\footnote{PyQt6: \url{https://pypi.org/project/PyQt6/}.}, 
+a Python library for creating GUI applications using the \emph{Qt toolkit}.  The application comprises a \textbf{600 x 900 pixels main window} where a \textbf{tab menu} gives users access to each page.
+All the pages utilize \emph{QtWidgets} to create the graphical components,  while a \textbf{thread worker} does all the heavy calculations and communicates  with the components through \textbf{signals}. 
+This structure allows the user to interrupt every process while it is running.
+For this application, a \textbf{custom QtWidget} was developed to show each step of the processing as an image dynamically. Following are the descriptions of each page.
+
+
+\begin{figure}[b]
+	\centering
+	\includegraphics[scale=0.45, keepaspectratio]{img/project_img/file-window.png}
+	\caption{The file menu window.}
+	\label{fig:file-menu}
+\end{figure}
+
+
+The file menu (Figure~\ref{fig:file-menu}) lets users choose which video file to process through 
+an ``\textbf{Open File}'' button. 
+The ``\textbf{Process}'' button starts the preprocessing explained in Section~\ref{sec:video_preprocessing}, 
+while the custom QtWidget shows each step. 
+A \textbf{label} showing the current file being processed with a corresponding \textbf{progress bar} 
+was employed to display the overall progress explicitly. The ``\textbf{Interrupt}'' button allows the user to interrupt the preprocessing.  Finally, the ``\textbf{Exit}'' button closes the application and cleans all the generated data. 
+After the preprocessing, the user gets redirected to the next tab, where it is possible to use Stable Diffusion. 
+
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45, keepaspectratio]{img/project_img/generation-window.png}
+	\caption{The diffusion window.}
+	\label{fig:diffusion-menu}
+\end{figure}
+
+
+
+The diffusion window (Figure~\ref{fig:diffusion-menu}) comprises an \textbf{image viewer} that 
+shows the cropped frames, where each frame can be cycled with the two \textbf{side buttons}. 
+The \textbf{two progress bars} respectively indicate the overall and  specific progress (testing, diffusion, frame application, and video generation). \textbf{Two text boxes} allow the users to input the prompt and the negative prompt, while \textbf{three sliders} are used to input steps, denoising strength, and CFG scale. The ``\textbf{Test}'' button tests Stable Diffusion parameters onto a single frame chosen  in the upper part, and the result is shown in the same image viewer. 
+The ``\textbf{Generate}'' button starts the complete process by collapsing the widgets used  for the parameters input and then showing each step, from diffusion to video generation, 
+in the image viewer. 
+Finally, the ``\textbf{Interrupt}'' button allows the user to interrupt the processing.  After the video is generated, the user gets redirected to the video export tab.
+
+
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.45, keepaspectratio]{img/project_img/video-window.png}
+	\caption{The video export window.}
+	\label{fig:video-player}
+\end{figure}
+
+The video export window (Figure~\ref{fig:video-player}) offers a complete \textbf{video player} 
+to see the results and the possibility of \textbf{saving the file} to a specific location. 
+The last button lets the user exit the application and clean all the generated data.
+
+
+The training helper window (Figure~\ref{fig:training-helper}) offers a companion for the LoRA training webUI (Section \ref{sec:lora_training_webui}). The window comprises \textbf{one file input} for the dataset video and \textbf{three directory inputs}  for the directories needed for the LoRA training. The ``\textbf{blur}'' slider represents the threshold for the blur detection algorithm. The ``\textbf{Training name}'' is the identifier inserted in the BLIP captions, while the ``\textbf{Output name}'' is the model's name, the same one used during diffusion. Finally, a progress bar with its label explicitly shows the overall progress. The ``\textbf{Process}'' button creates the necessary directories and starts processing the input video, as described in Section~\ref{sec:lora_training_webui}. The ``\textbf{Execute}'' button generates the  JSON configuration file needed for training. Finally, as said before, the ``\textbf{Interrupt}'' button allows the user to interrupt the processing.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[scale=0.44, keepaspectratio]{img/project_img/training-help.png}
+	\caption{The training helper window.}\label{fig:training-helper}
+\end{figure}
+
+
+
+\subsection{Problems and Possible Improvements on the Generated Video}
+
+\begin{figure}[b]
+	\centering
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[scale=0.34]{img/project_img/error-eyebrows.png}
+		\caption{Error on eyebrows.}\label{fig:error-eyebrows}
+	\end{subfigure}%
+	\hfill
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\includegraphics[scale=0.34]{img/project_img/error-eyes.png}
+		\caption{Error on eyes.}\label{fig:error-eyes}
+	\end{subfigure}
+	\caption{Examples of errors.}\label{fig:errors}
+\end{figure}
+
+Even though the software can give consistent results, these are far from perfect. In fact, during the development, the main focus was on achieving a \textbf{non-detectable deepfake}. The \emph{frame-to-frame coherence} problem was resolved through ControlNet  canny model used on cropped frames with a locked noise seed.  Some examples of detectable problems can be seen in Figure~\ref{fig:error-eyebrows} and Figure~\ref{fig:error-eyes},  where the software creates distorted faces. 
+
+These problems can be resolved in the future by implementing a better \emph{mask-creation algorithm} or even allowing the user to re-generate only broken frames. We still need to find out what a new and continuously improving technology like Stable Diffusion could be in the following years so that the solution might be completely different. The final video is still a $12$ FPS video, so implementing an \emph{ML-based frame interpolator} could achieve  $24$ or even $60$ FPS for more fluidity.  The GUI presented was to test all the components organically. However, the software could effortlessly become a \textbf{mobile application}, doing heavy calculations on a server, opening the possibility to widespread use (see the future work in Section~\ref{sect:conclusion}).
+
+Note that, as previously advanced, the use of Stable Diffusion quite easily allows for inpaint objects in the deepfake or changing the style. Inpainting is a technique that can be used to replace missing areas in images. The process is most frequently used to restore old, damaged photos and eliminate things like red eyes and fissures. However, the Stable Diffusion model allows for more: for instance, it can render something entirely new in any area of an existing image instead of simply replacing any missing portions. Figure~\ref{fig:options} shows how we have been able to elaborate on the deepfake and add new objects to the already generated video, as, for example, a parrot on the shoulder and a pair of glasses. The last picture on the right represents how to apply a style to the video. All these modifications can be easily used on the already generated deepfake; concerning the inpainting of new objects, of course, the new props need to consistently move together with the character if they just do not simply belong to the background (e.g., the parrot on the shoulder). Achieving the same result with techniques other than Stable Diffusion is not so straightforward. Indeed, Stable Diffusion allows for a high degree of control over the generation process and the ability to generate various images.
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.8, keepaspectratio]{img/project_img/FinalDemo.png}
+	\caption{An example of different possible modifications of the generated  deepfake by using Stable Diffusion.}\label{fig:options}
+\end{figure}
+
+
+\section{Related Work}\label{sect:related}
+Even if it consists of a recent cybersecurity threat (since only  year 2017), the high interest in video deepfake generation and detection can also be appreciated in the high number of references in the scientific literature. For example, only some of the most recent surveys on detection are \cite{surveydet,detection1,surveydet2}, and on both generation and detection are \cite{survey2,surveydgen1,survey3,survey4,survey1}.\footnote{These lists are not complete since it is outside the scope of this paper to offer a survey of surveys} Indeed, we are not here considering image and video manipulation before the term ``deepfake'' was coined~\cite{farid,bookvideoprocessing}.
+
+The many aforementioned surveys point to an even more considerable amount of generation (and detection) proposals elaborated in the first  six years of deepfakes.
+
+Some  pre-``Deep Learning boom'' proposals for face-swapping, which are more strictly related to this paper, were generally based on three steps (e.g., \cite{beforeDL}). These methods first identify faces in the source photos; then, they choose a candidate face image from the facial library that closely resembles the input facial positions and aspects. Second, the approach swaps out the face's eyes, nose, and mouth and further modifies the candidate face image's lighting and color to match the appearance of the input photographs. Finally, the method flawlessly combines the two faces. The third stage then computes a match distance over the overlap region to rank the blended candidate replacement. Under certain circumstances, these methods might produce good outcomes, but they have two significant drawbacks. \emph{i)} The expressions of the input face image are lost when they first replace the input face entirely with the target face. \emph{ii)} The artificial outcome is highly rigid, and the substituted face appears unnatural; for example, it must be in a similar stance to produce effective results.
+
+Due to their realistic outcomes, Deep Learning-based techniques have gained popularity for producing synthetic media. The first 2017 approach used  a neural network to morph a victim’s face onto someone else’s features while preserving the original  expressions~\cite{survey2}. Successive approaches used two encoder-decoder pairs, such as FakeApp and FaceSwap applications (advanced in Section~\ref{sec:intro}). Typically, a decoder is used to reconstruct a face after an encoder extracts the latent features of a face from an image. Two pairs of encoder and decoder, each trained on the source and target images separately, are needed to swap the faces between the source and target images. After training is finished, the decoders are switched, allowing the target picture to be recreated using the features of the source image using an original encoder of the source image and decoder of the target image.
+
+Until recently, most of the research focused on advances in face-swapping technology, either using a reconstructed \emph{3D morphable model} (\emph{3DMM})~\cite{irina,nirkin}, or GANs-based model~\cite{fsgan}. The work in \cite{irina} proposed a convolution neural network (CNN) based approach that transferred the semantic content, e.g., face posture, facial expression, and illumination conditions of the input image to create that style in another image. They introduced a loss function corresponding to a weighted combination of style loss, content loss, light loss, and total variation regularization.  A \emph{Complete Convolution Network} (\emph{FCN}) was employed in \cite{nirkin} to segment and replace faces, and a 3DMM was created to estimate facial geometry and related texture. After that, by modifying the model parameters, a target image was subjected to a face reconstruction. The methods in \cite{irina,nirkin} are constrained by the need for subject- or pair-specific training.
+
+
+Using the reenact and blend technique, \emph{FSGAN}~\cite{fsgan} permitted face swapping and reenactment in real-time. Pose, expression, and identity are manipulated simultaneously, achieving excellent and temporally cohesive outcomes.  GAN-based methods  perform better than several current autoencoder-decoder techniques (e.g., FakeApp and FaceSwap) since they do not require explicit training on subject-specific images. They are also well suited for face alteration jobs like creating lifelike images of artificial faces because of their iterative nature.
+
+
+Some studies employed a face swap disentanglement concept employing VAEs (see Section~\ref{sec:vae}). Two distinct VAEs were used by \emph{RSGAN}~\cite{rsgan} to encode the latent representation of the hair and face areas, respectively. Both encoders were trained to anticipate the characteristics of the target identification. Another method, \emph{FSNet}~\cite{fsnet}, provided a framework for face-swapping using a latent space, which allowed the source identity's face area and the target identity's landmarks to be independently encoded and then combined to produce the swapped face. For both the approaches in \cite{rsgan,fsnet} it is hard to maintain target characteristics such as target occlusion and lighting conditions. Face-swapping techniques are usually difficult to manage when facial occlusions occur: the source's or the target's face is partially obscured by hair, spectacles, a hand, or some other object.
+
+\emph{FaceShifter}~\cite{faceshifter} produces a swapped face with excellent accuracy while maintaining the target features, including position, expression, and occlusion. The source identification and the target attributes were encoded in the last layer of a facial recognition classifier, and feature maps were created using the \emph{U-Net} decoder. These encoded features were fed into a unique generator that adaptively modified the identification region and target attributes using cascaded \emph{Adaptive Attentional Denormalization} layers inside residual blocks.
+
+
+
+\section{Conclusion}\label{sect:conclusion}
+In conclusion, this paper has proposed a novel approach to deepfake creation using Stable Diffusion, ControlNet, and LoRA. Combining these three techniques shows that creating highly realistic and almost stable deepfakes with complete control over their features and quality is possible. Concerning GAN, the proposed approach allows for quick and easy modification of the obtained video by  using a text prompt, adding/removing some details, and changing the style  and the context of the deepfake. With Stable Diffusion, it is also possible to have more control over the fine-tuning of the result and to avoid some training problems that may happen in GANs (e.g., the mode collapse problem~\cite{collapse}).
+
+
+Furthermore, we have demonstrated how to fine-tune a Stable Diffusion model through LoRA,  allowing us to generate new faces not present in the original datasets. This may be an advantage for GAN-based models, which depend more on the training set for this specific case. We also showed how ControlNet can help us achieve more frame-to-frame consistency during the diffusion process and how all these models can be implemented in a single standalone application to generate deepfakes. 
+
+Indeed, we are aware of both the advantages and disadvantages of Stable Diffusion concerning GANs: the primary intent of this paper is to propose a new approach to the generation of deepfakes concerning the literature and to continue and foster research in the direction of diffusion approaches to deepfakes. For example, the diffusion process can be used as a regularization technique during the training of GANs, and help stabilize GAN training and improve the diversity and quality of generated samples~\cite{mix}.
+Moreover, it is possible to use a GAN  in diffusion models: for example, by predicting clean data from a noisy sample at intermediate time of diffusion sampling process~\cite{ganindiff1}, or by generating samples at intermediate diffusion time steps, then applying diffusion models to denoise these samples~\cite{ganindiff2}.
+
+
+Since MediaPipe supports multi-face detection, future versions of this software could expand the possibilities to a multi-face deepfake solution. Given that this solution could be slow with the current pipeline, an option is to distribute the diffusion process on multiple machines. This strategy could also give the possibility to do all the calculations on remote servers, allowing the software to become a lightweight client app on a mobile phone. A mobile application could also help the deepfake technology become easier to employ for a more significant number of users due to the low need for processing power. In future software versions, there will be the possibility to manage ControlNet parameters and change the current ControlNet model, making the diffusion process easier to adjust to the user's needs.
+
+The current software does not replicate the original audio to the output video. To solve this problem, we could copy the original audio to the final video or implement an ML-based solution to generate the audio with the target subject's voice. However, this last solution also creates the need to implement a training strategy for the audio component. Finally, the last improvement could be an ML-based frame interpolation strategy, resulting in a $24$ FPS or even $60$ FPS output video.
+
+
+
+%\bibliographystyle{sn-bibliography}  
+\bibliography{biblio}
+
+
+
+
+
+
+\end{document}
+
+
+
