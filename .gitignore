@@ -13,6 +13,7 @@
 .*.lb
 *.pdf
 *DS_Store*
+old/*
 
 ## Intermediate documents:
 *.dvi
